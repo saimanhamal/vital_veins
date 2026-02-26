@@ -1,0 +1,16 @@
+{
+  "name": "lifelink-seed",
+  "version": "1.0.0",
+  "description": "Database seeding script for LifeLink",
+  "main": "seedDatabase.js",
+  "scripts": {
+    "seed": "node seedDatabase.js",
+    "seed:dev": "NODE_ENV=development node seedDatabase.js",
+    "seed:prod": "NODE_ENV=production node seedDatabase.js"
+  },
+  "dependencies": {
+    "mongoose": "^7.0.0",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.0.0"
+  }
+}
