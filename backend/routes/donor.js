@@ -81,8 +81,7 @@ router.get('/dashboard', async (req, res) => {
       Appointment.countDocuments({ donor: donor._id, status: 'completed' }),
       Appointment.find({ 
         donor: donor._id, 
-        status: 'confirmed',
-        scheduledDate: { $gte: new Date() }
+        status: { $in: ['pending', 'confirmed', 'approved'] }
       })
         .populate('hospital', 'hospitalName address contact')
         .sort({ scheduledDate: 1 }),
@@ -102,6 +101,16 @@ router.get('/dashboard', async (req, res) => {
     // Get donation history summary
     const donationHistory = donor.donationHistory.slice(-10);
 
+    console.log(`Dashboard for donor ${donor._id}:`, {
+      totalDonations,
+      upcomingAppointmentsCount: upcomingAppointments.length,
+      upcomingAppointmentsList: upcomingAppointments.map(a => ({
+        id: a._id,
+        status: a.status,
+        scheduledDate: a.scheduledDate
+      }))
+    });
+
     res.json({
       donor: {
         id: donor._id,
@@ -112,10 +121,12 @@ router.get('/dashboard', async (req, res) => {
       },
       statistics: {
         totalDonations,
+        upcomingAppointments: upcomingAppointments.length,
         isEligibleForBloodDonation: isEligible,
         nextEligibleDate,
         bloodDonationCount: donor.donationPreferences.bloodDonation.totalDonations,
-        organConsent: donor.donationPreferences.organDonation.consent
+        organConsent: donor.donationPreferences.organDonation.consent,
+        nearbyHospitals: nearbyTickets.length
       },
       upcomingAppointments,
       recentDonations,
@@ -576,6 +587,87 @@ router.post('/tickets/:id/respond', validateObjectId('id'), requireActiveDonor, 
     console.error('Ticket response error:', error);
     res.status(500).json({
       message: 'Server error sending response',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// @route   DELETE /api/donor/tickets/:ticketId/response/:responseId
+// @desc    Withdraw/cancel response to emergency ticket
+// @access  Private (Donor only)
+router.delete('/tickets/:ticketId/response/:responseId', validateObjectId('ticketId'), validateObjectId('responseId'), requireActiveDonor, async (req, res) => {
+  try {
+    const { ticketId, responseId } = req.params;
+    const donor = req.donor;
+
+    const ticket = await Ticket.findById(ticketId).populate('hospital', 'hospitalName user');
+    if (!ticket) {
+      return res.status(404).json({
+        message: 'Ticket not found'
+      });
+    }
+
+    // Find the response
+    const responseIndex = ticket.responses.findIndex(r => r._id.toString() === responseId);
+    if (responseIndex === -1) {
+      return res.status(404).json({
+        message: 'Response not found'
+      });
+    }
+
+    // Check if the response belongs to the donor
+    if (ticket.responses[responseIndex].responder.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        message: 'Not authorized to withdraw this response'
+      });
+    }
+
+    // Check if ticket is still open (can only withdraw if ticket is open)
+    if (ticket.status === 'closed' || ticket.status === 'resolved') {
+      return res.status(400).json({
+        message: 'Cannot withdraw response from a closed or resolved ticket'
+      });
+    }
+
+    // Remove the response
+    ticket.responses.splice(responseIndex, 1);
+    await ticket.save();
+
+    // Create notification for hospital
+    const Notification = require('../models/Notification');
+    await Notification.createNotification({
+      sender: req.user._id,
+      recipients: [{
+        userId: ticket.hospital.user._id,
+        role: 'hospital'
+      }],
+      type: 'ticket_updated',
+      title: 'Response Withdrawn',
+      message: `${donor.fullName} has withdrawn their response from ticket ${ticket.ticketId}`,
+      priority: 'medium',
+      category: 'info',
+      data: { ticketId: ticket._id, donorId: donor._id }
+    });
+
+    // Send real-time notification
+    req.io.to(`hospital_${ticket.hospital.user._id}`).emit('response_withdrawn', {
+      ticketId: ticket._id,
+      donorName: donor.fullName,
+      responsesCount: ticket.responses.length
+    });
+
+    res.json({
+      message: 'Response withdrawn successfully',
+      ticket: {
+        id: ticket._id,
+        ticketId: ticket.ticketId,
+        responsesCount: ticket.responses.length
+      }
+    });
+  } catch (error) {
+    console.error('Withdraw response error:', error);
+    res.status(500).json({
+      message: 'Server error withdrawing response',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }

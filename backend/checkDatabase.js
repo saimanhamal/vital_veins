@@ -6,7 +6,7 @@ const Donor = require('./models/Donor');
 // Connect to MongoDB
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lifelink');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins');
     console.log('MongoDB connected successfully');
   } catch (error) {
     console.error('MongoDB connection error:', error);
@@ -52,7 +52,7 @@ const checkDatabase = async () => {
     
     // Check specific admin user
     console.log('\n🔍 CHECKING ADMIN LOGIN:');
-    const adminUser = await User.findOne({ email: 'admin@lifelink.com' }).select('+password');
+    const adminUser = await User.findOne({ email: 'admin@vitalveins.com' }).select('+password');
     if (adminUser) {
       console.log('✅ Admin user found in database');
       console.log(`   - Name: ${adminUser.name}`);

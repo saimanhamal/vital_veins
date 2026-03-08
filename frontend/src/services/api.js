@@ -118,6 +118,9 @@ export const adminAPI = {
   getDonors: (params) => api.get('/api/admin/donors', { params }),
   getTickets: (params) => api.get('/api/admin/tickets', { params }),
   getAnalytics: (params) => api.get('/api/admin/analytics', { params }),
+  getAppointments: (params) => api.get('/api/admin/appointments', { params }),
+  markAppointmentNoShow: (id, data) => api.put(`/api/admin/appointments/${id}/mark-no-show`, data),
+  cancelAppointmentAdmin: (id, data) => api.put(`/api/admin/appointments/${id}/cancel-admin`, data),
   approveHospital: (id, data) => api.put(`/api/admin/hospitals/${id}/approve`, data),
   approveDonor: (id) => api.post(`/api/admin/donors/${id}/approve`),
   rejectDonor: (id, data) => api.post(`/api/admin/donors/${id}/reject`, data),
@@ -154,6 +157,7 @@ export const donorAPI = {
   submitFeedback: (id, data) => api.post(`/api/donor/appointments/${id}/feedback`, data),
   getTickets: (params) => api.get('/api/donor/tickets', { params }),
   respondToTicket: (id, data) => api.post(`/api/donor/tickets/${id}/respond`, data),
+  withdrawTicketResponse: (ticketId, responseId) => api.delete(`/api/donor/tickets/${ticketId}/response/${responseId}`),
   getDonationHistory: (params) => api.get('/api/donor/donation-history', { params }),
   updatePreferences: (data) => api.put('/api/donor/preferences', data),
 };

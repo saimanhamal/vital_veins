@@ -555,7 +555,7 @@ router.put('/appointments/:id/cancel', validateObjectId('id'), async (req, res) 
     // Check if appointment can be cancelled (not already cancelled or completed)
     if (['cancelled', 'completed'].includes(appointmentCheck.status)) {
       return res.status(400).json({
-        message: `Cannot cancel appointment. Current status is '${appointmentCheck.status}'. Only pending or confirmed appointments can be cancelled.`
+        message: `Cannot cancel appointment. Current status is '${appointmentCheck.status}'. Only pending, confirmed, or approved appointments can be cancelled.`
       });
     }
 

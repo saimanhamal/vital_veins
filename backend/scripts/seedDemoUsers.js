@@ -7,7 +7,7 @@ require('dotenv').config();
 const demoUsers = [
   {
     name: 'Admin User',
-    email: 'admin@lifelink.com',
+    email: 'admin@vitalveins.com',
     password: 'Admin123',
     role: 'admin',
     verified: true,
@@ -115,7 +115,7 @@ const demoUsers = [
 async function seedDemoUsers() {
   try {
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lifelink');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins');
     console.log('✅ Connected to MongoDB');
 
     // Clear existing demo users
@@ -163,7 +163,7 @@ async function seedDemoUsers() {
     console.log('\n🎉 Demo users seeded successfully!');
     console.log('\n📋 Demo Credentials:');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('Admin:    admin@lifelink.com / Admin123');
+    console.log('Admin:    admin@vitalveins.com / Admin123');
     console.log('Hospital: sarah.johnson@cityhospital.com / Hospital123');
     console.log('Donor:    john.smith@email.com / Donor123');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');

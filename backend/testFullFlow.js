@@ -59,7 +59,7 @@ const testFullFlow = async () => {
     // 3. Admin login and check donors list
     console.log('\n3️⃣ Admin login and checking donors list...');
     const adminLoginRes = await axios.post('http://localhost:5000/api/auth/login', {
-      email: 'admin@lifelink.com',
+      email: 'admin@vitalveins.com',
       password: 'Admin123'
     });
     const adminToken = adminLoginRes.data.token;

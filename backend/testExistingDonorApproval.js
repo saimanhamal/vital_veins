@@ -15,7 +15,7 @@ async function test() {
     // 1. Get admin token
     console.log('1️⃣ Admin login...');
     const adminRes = await axios.post(`${API_URL}/auth/login`, {
-      email: 'admin@lifelink.com',
+      email: 'admin@vitalveins.com',
       password: 'Admin123'
     });
     adminToken = adminRes.data.token;

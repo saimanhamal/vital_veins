@@ -283,8 +283,8 @@ const DonorAppointments = () => {
   };
 
   const canCancel = (appointment) => {
-    return ['pending', 'confirmed'].includes(appointment.status) && 
-           isUpcoming(appointment.scheduledDate, appointment.scheduledTime, appointment.status);
+    // Allow cancelling pending, confirmed, and approved appointments regardless of timing
+    return ['pending', 'confirmed', 'approved'].includes(appointment.status);
   };
 
   const canReschedule = (appointment) => {
@@ -301,7 +301,10 @@ const DonorAppointments = () => {
       appointment.appointmentId?.toLowerCase().includes(filters.search.toLowerCase()) ||
       appointment.hospital?.hospitalName?.toLowerCase().includes(filters.search.toLowerCase());
     
-    return matchesSearch;
+    const matchesStatus = filters.status === 'all' || appointment.status === filters.status;
+    const matchesType = filters.type === 'all' || appointment.type === filters.type;
+    
+    return matchesSearch && matchesStatus && matchesType;
   });
 
   if (loading) {
@@ -357,33 +360,44 @@ const DonorAppointments = () => {
             count: appointments.length,
             icon: Calendar,
             color: 'text-blue-600',
-            bgColor: 'bg-blue-100'
+            bgColor: 'bg-blue-100',
+            filterStatus: 'all'
           },
           {
             title: 'Upcoming',
-            count: appointments.filter(a => ['pending', 'confirmed'].includes(a.status)).length,
+            count: appointments.filter(a => ['pending', 'confirmed', 'approved'].includes(a.status)).length,
             icon: Clock,
             color: 'text-green-600',
-            bgColor: 'bg-green-100'
+            bgColor: 'bg-green-100',
+            filterStatus: 'pending'
           },
           {
             title: 'Completed',
             count: appointments.filter(a => a.status === 'completed').length,
             icon: CheckCircle,
             color: 'text-purple-600',
-            bgColor: 'bg-purple-100'
+            bgColor: 'bg-purple-100',
+            filterStatus: 'completed'
           },
           {
             title: 'Cancelled',
             count: appointments.filter(a => a.status === 'cancelled').length,
             icon: XCircle,
             color: 'text-red-600',
-            bgColor: 'bg-red-100'
+            bgColor: 'bg-red-100',
+            filterStatus: 'cancelled'
           }
         ].map((stat, index) => {
           const Icon = stat.icon;
+          const handleStatClick = () => {
+            handleFilterChange('status', stat.filterStatus);
+          };
           return (
-            <div key={index} className="card p-6">
+            <div 
+              key={index} 
+              onClick={handleStatClick}
+              className="card p-6 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200"
+            >
               <div className="flex items-center space-x-3">
                 <div className={`w-12 h-12 rounded-lg ${stat.bgColor} flex items-center justify-center`}>
                   <Icon className={`w-6 h-6 ${stat.color}`} />
@@ -427,9 +441,11 @@ const DonorAppointments = () => {
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
             <option value="confirmed">Confirmed</option>
+            <option value="approved">Approved</option>
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
             <option value="rescheduled">Rescheduled</option>
+            <option value="no_show">No Show</option>
           </select>
 
           {/* Type Filter */}

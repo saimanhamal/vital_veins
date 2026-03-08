@@ -15,7 +15,7 @@ const testConnection = async () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        email: 'admin@lifelink.com',
+        email: 'admin@vitalveins.com',
         password: 'admin123'
       })
     });

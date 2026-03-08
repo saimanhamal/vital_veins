@@ -71,6 +71,12 @@ const HospitalDashboard = () => {
 
   const { statistics } = dashboardData || {};
 
+  const handleStatClick = (statTitle) => {
+    if (statTitle === 'Total Appointments') {
+      navigate('/hospital/appointments');
+    }
+  };
+
   const statCards = [
     {
       title: 'Blood Inventory',
@@ -86,7 +92,8 @@ const HospitalDashboard = () => {
       icon: Calendar,
       color: 'blue',
       change: '+12%',
-      changeType: 'positive'
+      changeType: 'positive',
+      onClick: () => handleStatClick('Total Appointments')
     },
     {
       title: 'Active Tickets',
@@ -94,7 +101,8 @@ const HospitalDashboard = () => {
       icon: Ticket,
       color: 'orange',
       change: '-3%',
-      changeType: 'negative'
+      changeType: 'negative',
+      onClick: () => navigate('/hospital/tickets')
     },
     {
       title: 'Total Donors',

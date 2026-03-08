@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { 
   Calendar, 
@@ -26,6 +27,7 @@ import { formatDateTime, getStatusClasses } from '../../utils/helpers';
 import toast from 'react-hot-toast';
 
 const HospitalAppointments = () => {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState({
     status: 'all',
     type: 'all',
@@ -94,7 +96,10 @@ const HospitalAppointments = () => {
       header: 'Donor Information',
       accessor: 'donor',
       render: (value, row) => (
-        <div className="flex items-center space-x-3">
+        <div 
+          className="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => navigate(`/donor-profile/${value?.user?._id}`)}
+        >
           <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
             <User className="w-5 h-5 text-gray-500" />
           </div>
@@ -287,6 +292,7 @@ const HospitalAppointments = () => {
             <option value="all">All Statuses</option>
             <option value="pending">Pending</option>
             <option value="confirmed">Confirmed</option>
+            <option value="approved">Approved</option>
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
           </select>

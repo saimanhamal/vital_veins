@@ -11,7 +11,7 @@ async function test() {
     console.log('\n1️⃣ ADMIN LOGIN');
     console.log('-'.repeat(60));
     const adminLogin = await axios.post(`${API_URL}/auth/login`, {
-      email: 'admin@lifelink.com',
+      email: 'admin@vitalveins.com',
       password: 'Admin123'
     });
     const adminToken = adminLogin.data.token;

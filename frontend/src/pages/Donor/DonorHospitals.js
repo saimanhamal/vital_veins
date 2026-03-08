@@ -41,7 +41,7 @@ const DonorHospitals = () => {
     search: '',
     specialization: 'all',
     status: 'approved',
-    sortBy: 'name',
+    sortBy: 'distance', // Changed default to 'distance' for auto-recommendation
     radius: '50' // km
   });
   const [selectedHospital, setSelectedHospital] = useState(null);
@@ -564,50 +564,88 @@ const DonorHospitals = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="space-y-4"
         >
+          {/* Nearby Hospitals Info */}
+          {filters.sortBy === 'distance' && userLocation && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 p-4 rounded-lg"
+            >
+              <div className="flex items-center space-x-3">
+                <MapPin className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-green-900">Hospitals Sorted by Distance</p>
+                  <p className="text-sm text-green-700">Showing hospitals within {filters.radius} km of your location</p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {filteredHospitals.length === 0 ? (
             <div className="card p-8 text-center">
               <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No Hospitals Found</h3>
-              <p className="text-gray-600">No hospitals found matching your search criteria.</p>
+              <p className="text-gray-600">
+                {filters.sortBy === 'distance' 
+                  ? `No hospitals found within ${filters.radius} km. Try increasing the radius.`
+                  : 'No hospitals found matching your search criteria.'}
+              </p>
             </div>
           ) : (
             <AnimatePresence>
               {filteredHospitals.map((hospital, index) => {
               const distance = calculateDistance(hospital);
+              const isClosest = index === 0 && filters.sortBy === 'distance' && distance;
               return (
                 <motion.div
                   key={hospital._id || hospital.id || `${hospital.hospitalName || 'hospital'}-${index}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="card p-6 hover:shadow-lg transition-shadow"
+                  className={`card p-6 hover:shadow-lg transition-all ${
+                    isClosest ? 'border-2 border-green-500 shadow-lg' : ''
+                  }`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-4 flex-1">
-                      <div className="flex-shrink-0">
-                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <Building2 className="w-6 h-6 text-blue-600" />
+                      <div className="flex-shrink-0 relative">
+                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                          isClosest ? 'bg-green-100' : 'bg-blue-100'
+                        }`}>
+                          <Building2 className={`w-6 h-6 ${isClosest ? 'text-green-600' : 'text-blue-600'}`} />
                         </div>
+                        {isClosest && (
+                          <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                            Closest
+                          </div>
+                        )}
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <h3 className="text-xl font-semibold text-gray-900 truncate">
+                        <div className="flex items-start justify-between gap-2 mb-2 flex-wrap">
+                          <h3 className="text-xl font-semibold text-gray-900">
                             {hospital.hospitalName}
                           </h3>
-                          {hospital.rating?.average > 0 && (
-                            <div className="flex items-center space-x-1">
-                              <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                              <span className="text-sm text-gray-600">
-                                {hospital.rating.average.toFixed(1)} ({hospital.rating.count})
+                          <div className="flex items-center gap-2">
+                            {hospital.rating?.average > 0 && (
+                              <div className="flex items-center space-x-1 bg-yellow-50 px-2 py-1 rounded">
+                                <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                                <span className="text-sm text-gray-700 font-medium">
+                                  {hospital.rating.average.toFixed(1)} ({hospital.rating.count})
+                                </span>
+                              </div>
+                            )}
+                            {distance && (
+                              <span className={`${
+                                isClosest 
+                                  ? 'bg-green-100 text-green-800 border-green-300' 
+                                  : 'bg-blue-100 text-blue-800 border-blue-300'
+                              } border px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1`}>
+                                <Navigation className="w-4 h-4" />
+                                {distance.toFixed(1)} km
                               </span>
-                            </div>
-                          )}
-                          {distance && (
-                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                              {distance.toFixed(1)} km away
-                            </span>
-                          )}
+                            )}
+                          </div>
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 mb-4">

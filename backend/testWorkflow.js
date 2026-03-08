@@ -11,7 +11,7 @@ async function test() {
     let adminToken;
     try {
       const adminLogin = await axios.post(`${API_URL}/auth/login`, {
-        email: 'admin@lifelink.com',
+        email: 'admin@vitalveins.com',
         password: 'Admin123'
       });
       adminToken = adminLogin.data.token;
@@ -75,7 +75,7 @@ async function test() {
     // 5. Verify donor is in Donor DB
     console.log('5️⃣ Verify Donor profile created...');
     const mongoose = require('mongoose');
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lifelink');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins');
     const Donor = require('./models/Donor');
     const User = require('./models/User');
     

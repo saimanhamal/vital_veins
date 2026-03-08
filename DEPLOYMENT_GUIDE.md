@@ -52,7 +52,7 @@ npm install
 cp env.example .env
 
 # Required variables:
-MONGODB_URI=mongodb://localhost:27017/lifelink
+MONGODB_URI=mongodb://localhost:27017/vitalveins
 JWT_SECRET=your_super_secret_jwt_key_here
 PORT=5000
 NODE_ENV=production

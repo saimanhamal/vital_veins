@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useQuery } from 'react-query';
+import { useQuery, useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import { 
   Heart, 
@@ -20,12 +20,24 @@ import { formatAddress, formatDateTime, getStatusClasses } from '../../utils/hel
 
 const DonorDashboard = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // Force refresh of dashboard data on mount
+  useEffect(() => {
+    queryClient.invalidateQueries('donor-dashboard');
+  }, [queryClient]);
+
   // Fetch dashboard data
   const { data: dashboardData, isLoading, error } = useQuery(
     'donor-dashboard',
     () => donorAPI.getDashboard().then(res => res.data),
     {
       refetchInterval: 30000, // Refetch every 30 seconds
+      staleTime: 0, // Always consider data stale
+      cacheTime: 0, // Don't cache the data
+      onSuccess: (data) => {
+        console.log('DonorDashboard data received:', data);
+      }
     }
   );
 
@@ -67,6 +79,8 @@ const DonorDashboard = () => {
 
   const { statistics, nextEligibleDate } = dashboardData || {};
 
+  console.log('DonorDashboard statistics:', statistics);
+
   // Calculate days until next eligible
   const getDaysUntilEligible = () => {
     if (!nextEligibleDate) return 'N/A';
@@ -75,6 +89,12 @@ const DonorDashboard = () => {
     const diffTime = eligibleDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays > 0 ? `${diffDays} days` : 'Eligible now!';
+  };
+
+  const handleStatClick = (statTitle) => {
+    if (statTitle === 'Upcoming Appointments') {
+      navigate('/donor/appointments');
+    }
   };
 
   const statCards = [
@@ -92,7 +112,8 @@ const DonorDashboard = () => {
       icon: Calendar,
       color: 'blue',
       change: '+1',
-      changeType: 'positive'
+      changeType: 'positive',
+      onClick: () => handleStatClick('Upcoming Appointments')
     },
     {
       title: 'Nearby Hospitals',

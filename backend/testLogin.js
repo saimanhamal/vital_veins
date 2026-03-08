@@ -5,7 +5,7 @@ const testLogin = async () => {
     console.log('🧪 Testing login endpoint directly...');
     
     const response = await axios.post('http://localhost:5000/api/auth/login', {
-      email: 'admin@lifelink.com',
+      email: 'admin@vitalveins.com',
       password: 'admin123'
     }, {
       headers: {

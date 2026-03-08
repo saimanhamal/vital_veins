@@ -5,6 +5,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        serif: ['Playfair Display', 'serif'],
+        sans: ['DM Sans', 'Nunito', 'sans-serif'],
+      },
       colors: {
         primary: {
           50: '#fef2f2',

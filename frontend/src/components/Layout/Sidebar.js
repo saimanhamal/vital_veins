@@ -50,6 +50,11 @@ const Sidebar = ({ onClose }) => {
             icon: Users,
           },
           {
+            name: 'Appointments',
+            href: '/admin/appointments',
+            icon: Calendar,
+          },
+          {
             name: 'Tickets',
             href: '/admin/tickets',
             icon: Ticket,

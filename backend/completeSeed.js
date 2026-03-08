@@ -7,7 +7,7 @@ const Donor = require('./models/Donor');
 // Connect to MongoDB
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lifelink');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins');
     console.log('✅ MongoDB connected successfully');
   } catch (error) {
     console.error('❌ MongoDB connection error:', error);
@@ -22,7 +22,7 @@ const completeSeed = async () => {
     console.log('🚀 COMPLETING DATABASE SEEDING...\n');
     
     // Check if admin exists
-    const adminExists = await User.findOne({ email: 'admin@lifelink.com' });
+    const adminExists = await User.findOne({ email: 'admin@vitalveins.com' });
     if (!adminExists) {
       console.log('❌ Admin user not found. Please run fixPassword.js first.');
       process.exit(1);
@@ -338,7 +338,7 @@ const completeSeed = async () => {
     
     console.log('\n✅ DATABASE SEEDING COMPLETED SUCCESSFULLY!');
     console.log('\n🔑 LOGIN CREDENTIALS:');
-    console.log('Admin: admin@lifelink.com / admin123');
+    console.log('Admin: admin@vitalveins.com / admin123');
     console.log('Hospital: admin@aiims.edu / hospital123');
     console.log('Donor: rahul.sharma@gmail.com / donor123');
     

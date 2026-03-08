@@ -25,6 +25,7 @@ import AdminHospitals from './pages/Admin/AdminHospitals';
 import AdminDonors from './pages/Admin/AdminDonors';
 import AdminTickets from './pages/Admin/AdminTickets';
 import AdminAnalytics from './pages/Admin/AdminAnalytics';
+import AdminAppointments from './pages/Admin/AdminAppointments';
 
 // Hospital Pages
 import HospitalInventory from './pages/Hospital/HospitalInventory';
@@ -78,6 +79,7 @@ function App() {
                 <Route path="hospitals" element={<AdminHospitals />} />
                 <Route path="donors" element={<AdminDonors />} />
                 <Route path="tickets" element={<AdminTickets />} />
+                <Route path="appointments" element={<AdminAppointments />} />
                 <Route path="analytics" element={<AdminAnalytics />} />
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="" element={<Navigate to="dashboard" replace />} />

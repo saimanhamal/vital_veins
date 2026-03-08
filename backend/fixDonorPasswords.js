@@ -5,7 +5,7 @@ const User = require('./models/User');
 // Connect to MongoDB
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lifelink');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins');
     console.log('✅ MongoDB connected successfully');
   } catch (error) {
     console.error('❌ MongoDB connection error:', error);
@@ -91,7 +91,7 @@ const fixDonorPasswords = async () => {
     console.log('\n🎉 DONOR PASSWORD FIX COMPLETE!');
     console.log('\n✅ ALL WORKING CREDENTIALS:');
     console.log('\n👑 Admin:');
-    console.log('   admin@lifelink.com / admin123');
+    console.log('   admin@vitalveins.com / admin123');
     console.log('\n🏥 Hospitals:');
     console.log('   admin@aiims.edu / hospital123');
     console.log('   info@apollohospitals.com / hospital123');

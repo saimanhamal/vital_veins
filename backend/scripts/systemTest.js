@@ -14,7 +14,7 @@ const testResults = {
 };
 
 const testCredentials = {
-  admin: { email: 'admin@lifelink.com', password: 'admin123' },
+  admin: { email: 'admin@vitalveins.com', password: 'admin123' },
   hospital: { email: 'sarah.johnson@cityhospital.com', password: 'hospital123' },
   donor: { email: 'john.smith@email.com', password: 'donor123' }
 };
@@ -227,7 +227,7 @@ async function testUserProfiles() {
 
 async function testDatabaseConnection() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lifelink');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins');
     const connectionState = mongoose.connection.readyState;
     if (connectionState !== 1) {
       throw new Error(`Database connection state: ${connectionState} (should be 1)`);
@@ -267,7 +267,7 @@ async function testInventorySearch() {
 
 // Main test runner
 async function runAllTests() {
-  log('🚀 Starting LifeLink System Tests', 'info');
+  log('🚀 Starting VitalVeins System Tests', 'info');
   log('=====================================', 'info');
   
   const testSuites = [

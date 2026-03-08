@@ -266,7 +266,7 @@ npm list mongoose express
 npm start
 # Expected output:
 # ✅ MongoDB connected successfully
-# 🚀 LifeLink server running on port 5000
+# 🚀 VitalVeins server running on port 5000
 # 📊 Health check: http://localhost:5000/api/health
 ```
 

@@ -16,7 +16,7 @@ async function test() {
     console.log('\n1️⃣ ADMIN LOGIN');
     console.log('-'.repeat(60));
     const adminLogin = await axios.post(`${API_URL}/auth/login`, {
-      email: 'admin@lifelink.com',
+      email: 'admin@vitalveins.com',
       password: 'Admin123'
     });
     const adminToken = adminLogin.data.token;
@@ -85,7 +85,7 @@ async function test() {
     console.log('-'.repeat(60));
     
     // Check via MongoDB
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lifelink');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins');
     const Donor = require('./models/Donor');
     const User = require('./models/User');
     

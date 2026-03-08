@@ -13,7 +13,8 @@ const {
   checkDonorEligibility,
   checkSlotAvailability,
   checkEmergencyLink,
-  validateStatusTransition
+  validateStatusTransition,
+  validateDonorCancelAppointment
 } = require('../middleware/appointmentValidation');
 
 /**
@@ -389,6 +390,7 @@ router.put(
   '/:id/cancel',
   authenticate,
   validateObjectId('id'),
+  validateDonorCancelAppointment,
   async (req, res) => {
     try {
       const { reason = '' } = req.body;

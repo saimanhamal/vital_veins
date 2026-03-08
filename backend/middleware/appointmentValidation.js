@@ -295,11 +295,222 @@ const validateStatusTransition = (req, res, next) => {
   next();
 };
 
+/**
+ * Validation for marking appointment as no-show
+ * Checks: appointment exists, valid status, appointment time has passed
+ */
+const validateMarkNoShow = [
+  body('reason')
+    .optional()
+    .trim()
+    .isLength({ min: 5, max: 500 })
+    .withMessage('Reason must be between 5 and 500 characters if provided')
+    .isString()
+    .withMessage('Reason must be a string'),
+  
+  async (req, res, next) => {
+    // Check validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    try {
+      const { id } = req.params;
+      const appointment = await Appointment.findById(id);
+
+      if (!appointment) {
+        return res.status(404).json({
+          message: 'Appointment not found',
+          appointmentId: id
+        });
+      }
+
+      // Check if appointment status allows marking as no-show
+      if (!['pending', 'confirmed'].includes(appointment.status)) {
+        return res.status(400).json({
+          message: `Cannot mark ${appointment.status} appointment as no-show`,
+          currentStatus: appointment.status,
+          allowedStatuses: ['pending', 'confirmed']
+        });
+      }
+
+      // Check if appointment time has passed
+      const appointmentDateTime = new Date(`${appointment.scheduledDate}T${appointment.scheduledTime}`);
+      const now = new Date();
+      
+      if (appointmentDateTime > now) {
+        return res.status(400).json({
+          message: 'Cannot mark future appointments as no-show',
+          appointmentTime: appointmentDateTime,
+          currentTime: now,
+          minutesUntilAppointment: Math.ceil((appointmentDateTime - now) / (1000 * 60))
+        });
+      }
+
+      next();
+    } catch (error) {
+      console.error('Validation error in validateMarkNoShow:', error);
+      return res.status(500).json({
+        message: 'Server error validating appointment',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+];
+
+/**
+ * Validation for cancelling appointment by admin
+ * Checks: appointment exists, valid status, authorization
+ */
+const validateAdminCancelAppointment = [
+  body('reason')
+    .optional()
+    .trim()
+    .isLength({ min: 5, max: 500 })
+    .withMessage('Reason must be between 5 and 500 characters if provided')
+    .isString()
+    .withMessage('Reason must be a string'),
+  
+  async (req, res, next) => {
+    // Check validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    try {
+      const { id } = req.params;
+      const appointment = await Appointment.findById(id);
+
+      if (!appointment) {
+        return res.status(404).json({
+          message: 'Appointment not found',
+          appointmentId: id
+        });
+      }
+
+      // Check if appointment status allows cancellation
+      const cancellableStatuses = ['pending', 'confirmed', 'approved'];
+      if (!cancellableStatuses.includes(appointment.status)) {
+        return res.status(400).json({
+          message: `Cannot cancel ${appointment.status} appointment`,
+          currentStatus: appointment.status,
+          allowedStatuses: cancellableStatuses,
+          reason: 'Completed, cancelled, or no-show appointments cannot be cancelled'
+        });
+      }
+
+      next();
+    } catch (error) {
+      console.error('Validation error in validateAdminCancelAppointment:', error);
+      return res.status(500).json({
+        message: 'Server error validating appointment',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+];
+
+/**
+ * Validation for donor cancelling appointment
+ * Checks: appointment exists, donor authorization, status, time window
+ */
+const validateDonorCancelAppointment = [
+  body('reason')
+    .optional()
+    .trim()
+    .isLength({ min: 5, max: 500 })
+    .withMessage('Reason must be between 5 and 500 characters if provided')
+    .isString()
+    .withMessage('Reason must be a string'),
+  
+  async (req, res, next) => {
+    // Check validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    try {
+      const { id } = req.params;
+      const appointment = await Appointment.findById(id).populate('donor', 'user');
+
+      if (!appointment) {
+        return res.status(404).json({
+          message: 'Appointment not found',
+          appointmentId: id
+        });
+      }
+
+      // Check donor authorization
+      if (appointment.donor.user.toString() !== req.user.id) {
+        return res.status(403).json({
+          message: 'You are not authorized to cancel this appointment',
+          appointmentId: id
+        });
+      }
+
+      // Check if appointment status allows cancellation
+      if (!['pending', 'confirmed'].includes(appointment.status)) {
+        return res.status(400).json({
+          message: `Cannot cancel ${appointment.status} appointment`,
+          currentStatus: appointment.status,
+          allowedStatuses: ['pending', 'confirmed']
+        });
+      }
+
+      // Check if appointment is in the future
+      const appointmentDateTime = new Date(`${appointment.scheduledDate}T${appointment.scheduledTime}`);
+      const now = new Date();
+      
+      if (appointmentDateTime <= now) {
+        return res.status(400).json({
+          message: 'Cannot cancel past appointments',
+          appointmentTime: appointmentDateTime,
+          currentTime: now
+        });
+      }
+
+      // Check cancellation lead time (minimum 24 hours)
+      const hoursUntilAppointment = (appointmentDateTime - now) / (1000 * 60 * 60);
+      if (hoursUntilAppointment < 24) {
+        return res.status(400).json({
+          message: 'Cannot cancel appointment within 24 hours of scheduled time',
+          requiredLeadTime: '24 hours',
+          hoursRemaining: Math.floor(hoursUntilAppointment),
+          minCancellationTime: new Date(appointmentDateTime - 24 * 60 * 60 * 1000)
+        });
+      }
+
+      next();
+    } catch (error) {
+      console.error('Validation error in validateDonorCancelAppointment:', error);
+      return res.status(500).json({
+        message: 'Server error validating appointment',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+];
+
 module.exports = {
   validateAppointmentBooking,
   handleValidationErrors,
   checkDonorEligibility,
   checkSlotAvailability,
   checkEmergencyLink,
-  validateStatusTransition
+  validateStatusTransition,
+  validateMarkNoShow,
+  validateAdminCancelAppointment,
+  validateDonorCancelAppointment
 };

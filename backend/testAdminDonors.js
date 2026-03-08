@@ -5,7 +5,7 @@ const testAdminDonors = async () => {
     // 1. Login as admin
     console.log('🔐 Logging in as admin...');
     const loginRes = await axios.post('http://localhost:5000/api/auth/login', {
-      email: 'admin@lifelink.com',
+      email: 'admin@vitalveins.com',
       password: 'Admin123'
     });
     

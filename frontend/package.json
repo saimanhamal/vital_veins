@@ -1,7 +1,7 @@
 {
-  "name": "lifelink-frontend",
+  "name": "vitalveins-frontend",
   "version": "1.0.0",
-  "description": "LifeLink Frontend - Smart Blood & Organ Donation Management System",
+  "description": "VitalVeins Frontend - Smart Blood & Organ Donation Management System",
   "private": true,
   "dependencies": {
     "@babel/core": "^7.16.0",

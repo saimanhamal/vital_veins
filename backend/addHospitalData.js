@@ -5,7 +5,7 @@ const Donor = require('./models/Donor');
 const User = require('./models/User');
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lifelink', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })

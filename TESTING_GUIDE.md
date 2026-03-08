@@ -9,7 +9,7 @@
 mongod
 
 # Or use MongoDB Atlas connection string in .env
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/lifelink
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/vitalveins
 ```
 
 ### 2. Start Backend Server

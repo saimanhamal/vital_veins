@@ -138,7 +138,7 @@ rejectDonor: (id, data) => api.post(`/api/admin/donors/${id}/reject`, data),
 - Status: Pending (verified: false, not in Donor DB)
 
 **Admin Account**:
-- Email: `admin@lifelink.com`
+- Email: `admin@vitalveins.com`
 - Password: `Admin123`
 
 **Test Flow**:
@@ -175,7 +175,7 @@ rejectDonor: (id, data) => api.post(`/api/admin/donors/${id}/reject`, data),
 ## Database State
 
 ### User Collection
-- `admin@lifelink.com`: role='admin', verified=true
+- `admin@vitalveins.com`: role='admin', verified=true
 - `kk123@gmail.com`: role='donor', verified=false (pending)
 
 ### Donor Collection  

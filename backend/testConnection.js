@@ -15,7 +15,7 @@ async function test() {
     console.log('\n2️⃣ Attempting admin login...');
     try {
       const loginRes = await axios.post(`${API_URL}/auth/login`, {
-        email: 'admin@lifelink.com',
+        email: 'admin@vitalveins.com',
         password: 'Admin123'
       });
       console.log('✅ Admin login successful');

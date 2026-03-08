@@ -5,7 +5,7 @@ const User = require('./models/User');
 // Connect to MongoDB
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lifelink');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins');
     console.log('✅ MongoDB connected successfully');
   } catch (error) {
     console.error('❌ MongoDB connection error:', error);
@@ -21,7 +21,7 @@ const testAllLogins = async () => {
     
     // Test credentials
     const testCredentials = [
-      { email: 'admin@lifelink.com', password: 'admin123', role: 'Admin' },
+      { email: 'admin@vitalveins.com', password: 'admin123', role: 'Admin' },
       { email: 'admin@aiims.edu', password: 'hospital123', role: 'Hospital' },
       { email: 'info@apollohospitals.com', password: 'hospital123', role: 'Hospital' },
       { email: 'contact@fortishealthcare.com', password: 'hospital123', role: 'Hospital' },
@@ -66,7 +66,7 @@ const testAllLogins = async () => {
     console.log('🎯 SUMMARY OF WORKING CREDENTIALS:');
     console.log('');
     console.log('👑 Admin Account:');
-    console.log('   Email: admin@lifelink.com');
+    console.log('   Email: admin@vitalveins.com');
     console.log('   Password: admin123');
     console.log('');
     console.log('🏥 Hospital Accounts:');

@@ -6,7 +6,7 @@ const Donor = require('./models/Donor');
 
 const checkDonors = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lifelink');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins');
     console.log('✅ Connected to MongoDB');
     
     // Show all donors with their status

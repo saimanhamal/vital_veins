@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 async function approveHospital() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lifelink');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins');
     console.log('✅ Connected to MongoDB\n');
 
     const Hospital = require('./models/Hospital');

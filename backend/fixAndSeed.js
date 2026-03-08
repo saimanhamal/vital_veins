@@ -7,7 +7,7 @@ const Donor = require('./models/Donor');
 // Connect to MongoDB
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lifelink');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins');
     console.log('✅ MongoDB connected successfully');
   } catch (error) {
     console.error('❌ MongoDB connection error:', error);
@@ -33,7 +33,7 @@ const fixAndSeed = async () => {
     const adminPassword = await bcrypt.hash('admin123', 12);
     const adminUser = new User({
       name: 'Admin User',
-      email: 'admin@lifelink.com',
+      email: 'admin@vitalveins.com',
       password: adminPassword,
       role: 'admin',
       verified: true,
@@ -49,7 +49,7 @@ const fixAndSeed = async () => {
     console.log('✅ Admin user created');
     
     // Test admin login immediately
-    const testAdmin = await User.findOne({ email: 'admin@lifelink.com' }).select('+password');
+    const testAdmin = await User.findOne({ email: 'admin@vitalveins.com' }).select('+password');
     const passwordTest = await bcrypt.compare('admin123', testAdmin.password);
     console.log(`🔐 Admin password test: ${passwordTest ? '✅ PASS' : '❌ FAIL'}`);
     
@@ -459,7 +459,7 @@ const fixAndSeed = async () => {
     
     console.log('\n✅ DATABASE SEEDING COMPLETED SUCCESSFULLY!');
     console.log('\n🔑 LOGIN CREDENTIALS:');
-    console.log('Admin: admin@lifelink.com / admin123');
+    console.log('Admin: admin@vitalveins.com / admin123');
     console.log('Hospitals: admin@aiims.edu / hospital123 (and others)');
     console.log('Donors: rahul.sharma@gmail.com / donor123 (and others)');
     

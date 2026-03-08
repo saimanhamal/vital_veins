@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 const User = require('./models/User');
 const Hospital = require('./models/Hospital');
 const Donor = require('./models/Donor');
@@ -9,7 +8,7 @@ const Ticket = require('./models/Ticket');
 // Connect to MongoDB
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lifelink', {
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins', {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
@@ -38,134 +37,134 @@ const clearDatabase = async () => {
 const demoUsers = [
   {
     name: 'Admin User',
-    email: 'admin@lifelink.com',
+    email: 'admin@vitalveins.com',
     password: 'admin123',
     role: 'admin',
     verified: true,
-    phone: '+91-9876543210',
-    address: 'Admin Office, Delhi',
+    phone: '+977-1-4419047',
+    address: 'VitalVeins Office, Kathmandu',
     location: {
       type: 'Point',
-      coordinates: [77.2090, 28.6139] // Delhi
+      coordinates: [85.3240, 27.7172] // Kathmandu
     }
   },
   // Hospital Users
   {
-    name: 'AIIMS Delhi',
-    email: 'admin@aiims.edu',
+    name: 'Tribhuvan University Teaching Hospital',
+    email: 'admin@tuth.edu.np',
     password: 'hospital123',
     role: 'hospital',
     verified: true,
-    phone: '+91-11-26588500',
-    address: 'Ansari Nagar, New Delhi',
+    phone: '+977-1-4412303',
+    address: 'Maharajgunj, Kathmandu',
     location: {
       type: 'Point',
-      coordinates: [77.2090, 28.5672]
+      coordinates: [85.3326, 27.7372]
     }
   },
   {
-    name: 'Apollo Hospital',
-    email: 'info@apollohospitals.com',
+    name: 'Nepal Medical College',
+    email: 'info@nmc.edu.np',
     password: 'hospital123',
     role: 'hospital',
     verified: true,
-    phone: '+91-11-71791000',
-    address: 'Sarita Vihar, New Delhi',
+    phone: '+977-1-6648123',
+    address: 'Jorpati, Kathmandu',
     location: {
       type: 'Point',
-      coordinates: [77.2773, 28.5245]
+      coordinates: [85.3694, 27.7489]
     }
   },
   {
-    name: 'Fortis Hospital',
-    email: 'contact@fortishealthcare.com',
+    name: 'Kathmandu Medical College',
+    email: 'contact@kmc.edu.np',
     password: 'hospital123',
     role: 'hospital',
     verified: true,
-    phone: '+91-11-42776222',
-    address: 'Sector 62, Noida',
+    phone: '+977-1-4782267',
+    address: 'Dhulikhel, Kavre',
     location: {
       type: 'Point',
-      coordinates: [77.3648, 28.6280]
+      coordinates: [85.4167, 27.6167]
     }
   },
   {
-    name: 'Max Hospital',
-    email: 'info@maxhealthcare.com',
+    name: 'Patan Academy of Health Sciences',
+    email: 'info@pahs.edu.np',
     password: 'hospital123',
     role: 'hospital',
     verified: true,
-    phone: '+91-11-26925801',
-    address: 'Saket, New Delhi',
+    phone: '+977-1-5521630',
+    address: 'Lalitpur, Nepal',
     location: {
       type: 'Point',
-      coordinates: [77.2167, 28.5245]
+      coordinates: [85.3225, 27.6725]
     }
   },
   // Donor Users
   {
-    name: 'Rahul Sharma',
-    email: 'rahul.sharma@gmail.com',
+    name: 'Rajesh Adhikari',
+    email: 'rajesh.adhikari@gmail.com',
     password: 'donor123',
     role: 'donor',
     verified: true,
-    phone: '+91-9876543211',
-    address: 'Connaught Place, Delhi',
+    phone: '+977-9841234567',
+    address: 'Thamel, Kathmandu',
     location: {
       type: 'Point',
-      coordinates: [77.2167, 28.6289]
+      coordinates: [85.3203, 27.7128]
     }
   },
   {
-    name: 'Priya Singh',
-    email: 'priya.singh@gmail.com',
+    name: 'Sunita Thapa',
+    email: 'sunita.thapa@gmail.com',
     password: 'donor123',
     role: 'donor',
     verified: true,
-    phone: '+91-9876543212',
-    address: 'Lajpat Nagar, Delhi',
+    phone: '+977-9842345678',
+    address: 'Patan, Lalitpur',
     location: {
       type: 'Point',
-      coordinates: [77.2436, 28.5677]
+      coordinates: [85.3225, 27.6725]
     }
   },
   {
-    name: 'Amit Kumar',
-    email: 'amit.kumar@gmail.com',
+    name: 'Anuj Joshi',
+    email: 'anuj.joshi@gmail.com',
     password: 'donor123',
     role: 'donor',
     verified: true,
-    phone: '+91-9876543213',
-    address: 'Karol Bagh, Delhi',
+    phone: '+977-9843456789',
+    address: 'Bhaktapur, Nepal',
     location: {
       type: 'Point',
-      coordinates: [77.1909, 28.6519]
+      coordinates: [85.3833, 27.6735]
     }
   },
   {
-    name: 'Sneha Patel',
-    email: 'sneha.patel@gmail.com',
+    name: 'Neha Shrestha',
+    email: 'neha.shrestha@gmail.com',
     password: 'donor123',
     role: 'donor',
     verified: true,
-    phone: '+91-9876543214',
-    address: 'Dwarka, Delhi',
+    phone: '+977-9844567890',
+    address: 'Naxal, Kathmandu',
     location: {
       type: 'Point',
-      coordinates: [77.0469, 28.5921]
+      coordinates: [85.3270, 27.7220]
     }
   },
   {
-    name: 'Vikash Gupta',
-    email: 'vikash.gupta@gmail.com',
+    name: 'Vikram Karmacharya',
+    email: 'vikram.karmacharya@gmail.com',
     password: 'donor123',
     role: 'donor',
     verified: true,
-    phone: '+91-9876543215',
-    address: 'Rohini, Delhi',
+    phone: '+977-9845678901',
+    address: 'Baluwatar, Kathmandu',
     location: {
       type: 'Point',
-      coordinates: [77.1025, 28.7041]
+      coordinates: [85.3333, 27.7378]
     }
   }
 ];
@@ -176,12 +175,10 @@ const createUsers = async () => {
     const users = [];
     
     for (const userData of demoUsers) {
-      const salt = await bcrypt.genSalt(12);
-      const hashedPassword = await bcrypt.hash(userData.password, salt);
-      
+      // Don't hash here - User model pre-save hook will handle it
       const user = new User({
-        ...userData,
-        password: hashedPassword
+        ...userData
+        // password is passed as plain text - User model will hash it
       });
       
       await user.save();
@@ -204,140 +201,29 @@ const createHospitals = async (users) => {
     
     const hospitalData = [
       {
-        hospitalName: 'All India Institute of Medical Sciences (AIIMS)',
-        license: 'AIIMS-DL-001',
+        hospitalName: 'Tribhuvan University Teaching Hospital',
+        license: 'TUTH-KTM-001',
         address: {
-          street: 'Ansari Nagar East',
-          city: 'New Delhi',
-          state: 'Delhi',
-          zipCode: '110029',
-          country: 'India'
+          street: 'Maharajgunj Road',
+          city: 'Kathmandu',
+          state: 'Bagmati',
+          zipCode: '44600',
+          country: 'Nepal'
         },
         location: {
           type: 'Point',
-          coordinates: [77.2090, 28.5672]
+          coordinates: [85.3326, 27.7372]
         },
         contact: {
-          phone: '+91-11-26588500',
-          email: 'admin@aiims.edu',
-          website: 'https://www.aiims.edu'
+          phone: '+977-1-4412303',
+          email: 'admin@tuth.edu.np',
+          website: 'https://www.tuth.edu.np'
         },
         status: 'approved',
         specialization: ['General', 'Cardiology', 'Neurology', 'Emergency', 'Transplant'],
         capacity: {
-          beds: 2500,
-          icuBeds: 300,
-          operationRooms: 50
-        },
-        workingHours: {
-          monday: { open: '00:00', close: '23:59', closed: false },
-          tuesday: { open: '00:00', close: '23:59', closed: false },
-          wednesday: { open: '00:00', close: '23:59', closed: false },
-          thursday: { open: '00:00', close: '23:59', closed: false },
-          friday: { open: '00:00', close: '23:59', closed: false },
-          saturday: { open: '00:00', close: '23:59', closed: false },
-          sunday: { open: '00:00', close: '23:59', closed: false }
-        },
-        rating: { average: 4.8, count: 1250 }
-      },
-      {
-        hospitalName: 'Apollo Hospital Delhi',
-        license: 'APL-DL-002',
-        address: {
-          street: 'Mathura Road, Sarita Vihar',
-          city: 'New Delhi',
-          state: 'Delhi',
-          zipCode: '110076',
-          country: 'India'
-        },
-        location: {
-          type: 'Point',
-          coordinates: [77.2773, 28.5245]
-        },
-        contact: {
-          phone: '+91-11-71791000',
-          email: 'info@apollohospitals.com',
-          website: 'https://www.apollohospitals.com'
-        },
-        status: 'approved',
-        specialization: ['General', 'Cardiology', 'Oncology', 'Emergency'],
-        capacity: {
-          beds: 700,
-          icuBeds: 100,
-          operationRooms: 25
-        },
-        workingHours: {
-          monday: { open: '06:00', close: '22:00', closed: false },
-          tuesday: { open: '06:00', close: '22:00', closed: false },
-          wednesday: { open: '06:00', close: '22:00', closed: false },
-          thursday: { open: '06:00', close: '22:00', closed: false },
-          friday: { open: '06:00', close: '22:00', closed: false },
-          saturday: { open: '06:00', close: '22:00', closed: false },
-          sunday: { open: '08:00', close: '20:00', closed: false }
-        },
-        rating: { average: 4.5, count: 890 }
-      },
-      {
-        hospitalName: 'Fortis Hospital Noida',
-        license: 'FRT-UP-003',
-        address: {
-          street: 'B-22, Sector 62',
-          city: 'Noida',
-          state: 'Uttar Pradesh',
-          zipCode: '201301',
-          country: 'India'
-        },
-        location: {
-          type: 'Point',
-          coordinates: [77.3648, 28.6280]
-        },
-        contact: {
-          phone: '+91-11-42776222',
-          email: 'contact@fortishealthcare.com',
-          website: 'https://www.fortishealthcare.com'
-        },
-        status: 'approved',
-        specialization: ['General', 'Cardiology', 'Neurology', 'Pediatrics'],
-        capacity: {
-          beds: 400,
-          icuBeds: 60,
-          operationRooms: 15
-        },
-        workingHours: {
-          monday: { open: '06:00', close: '22:00', closed: false },
-          tuesday: { open: '06:00', close: '22:00', closed: false },
-          wednesday: { open: '06:00', close: '22:00', closed: false },
-          thursday: { open: '06:00', close: '22:00', closed: false },
-          friday: { open: '06:00', close: '22:00', closed: false },
-          saturday: { open: '06:00', close: '22:00', closed: false },
-          sunday: { open: '08:00', close: '20:00', closed: false }
-        },
-        rating: { average: 4.3, count: 567 }
-      },
-      {
-        hospitalName: 'Max Super Speciality Hospital',
-        license: 'MAX-DL-004',
-        address: {
-          street: '1, 2, Press Enclave Road, Saket',
-          city: 'New Delhi',
-          state: 'Delhi',
-          zipCode: '110017',
-          country: 'India'
-        },
-        location: {
-          type: 'Point',
-          coordinates: [77.2167, 28.5245]
-        },
-        contact: {
-          phone: '+91-11-26925801',
-          email: 'info@maxhealthcare.com',
-          website: 'https://www.maxhealthcare.in'
-        },
-        status: 'approved',
-        specialization: ['General', 'Cardiology', 'Transplant', 'Emergency'],
-        capacity: {
-          beds: 500,
-          icuBeds: 80,
+          beds: 800,
+          icuBeds: 150,
           operationRooms: 20
         },
         workingHours: {
@@ -349,7 +235,118 @@ const createHospitals = async (users) => {
           saturday: { open: '00:00', close: '23:59', closed: false },
           sunday: { open: '00:00', close: '23:59', closed: false }
         },
-        rating: { average: 4.6, count: 723 }
+        rating: { average: 4.7, count: 1050 }
+      },
+      {
+        hospitalName: 'Nepal Medical College',
+        license: 'NMC-KTM-002',
+        address: {
+          street: 'Jorpati, Kathmandu',
+          city: 'Kathmandu',
+          state: 'Bagmati',
+          zipCode: '44600',
+          country: 'Nepal'
+        },
+        location: {
+          type: 'Point',
+          coordinates: [85.3694, 27.7489]
+        },
+        contact: {
+          phone: '+977-1-6648123',
+          email: 'info@nmc.edu.np',
+          website: 'https://www.nmc.edu.np'
+        },
+        status: 'approved',
+        specialization: ['General', 'Cardiology', 'Neurology', 'Emergency'],
+        capacity: {
+          beds: 500,
+          icuBeds: 80,
+          operationRooms: 15
+        },
+        workingHours: {
+          monday: { open: '06:00', close: '22:00', closed: false },
+          tuesday: { open: '06:00', close: '22:00', closed: false },
+          wednesday: { open: '06:00', close: '22:00', closed: false },
+          thursday: { open: '06:00', close: '22:00', closed: false },
+          friday: { open: '06:00', close: '22:00', closed: false },
+          saturday: { open: '06:00', close: '22:00', closed: false },
+          sunday: { open: '08:00', close: '20:00', closed: false }
+        },
+        rating: { average: 4.4, count: 820 }
+      },
+      {
+        hospitalName: 'Kathmandu Medical College',
+        license: 'KMC-KVR-003',
+        address: {
+          street: 'Dhulikhel Road',
+          city: 'Dhulikhel',
+          state: 'Kavre',
+          zipCode: '45200',
+          country: 'Nepal'
+        },
+        location: {
+          type: 'Point',
+          coordinates: [85.4167, 27.6167]
+        },
+        contact: {
+          phone: '+977-1-4782267',
+          email: 'contact@kmc.edu.np',
+          website: 'https://www.kmc.edu.np'
+        },
+        status: 'approved',
+        specialization: ['General', 'Pediatrics', 'Neurology', 'Emergency'],
+        capacity: {
+          beds: 400,
+          icuBeds: 60,
+          operationRooms: 12
+        },
+        workingHours: {
+          monday: { open: '06:00', close: '22:00', closed: false },
+          tuesday: { open: '06:00', close: '22:00', closed: false },
+          wednesday: { open: '06:00', close: '22:00', closed: false },
+          thursday: { open: '06:00', close: '22:00', closed: false },
+          friday: { open: '06:00', close: '22:00', closed: false },
+          saturday: { open: '06:00', close: '22:00', closed: false },
+          sunday: { open: '08:00', close: '20:00', closed: false }
+        },
+        rating: { average: 4.3, count: 650 }
+      },
+      {
+        hospitalName: 'Patan Academy of Health Sciences',
+        license: 'PAHS-LPT-004',
+        address: {
+          street: 'Midpoint, Lalitpur',
+          city: 'Lalitpur',
+          state: 'Bagmati',
+          zipCode: '44700',
+          country: 'Nepal'
+        },
+        location: {
+          type: 'Point',
+          coordinates: [85.3225, 27.6725]
+        },
+        contact: {
+          phone: '+977-1-5521630',
+          email: 'info@pahs.edu.np',
+          website: 'https://www.pahs.edu.np'
+        },
+        status: 'approved',
+        specialization: ['General', 'Cardiology', 'Transplant', 'Emergency'],
+        capacity: {
+          beds: 450,
+          icuBeds: 70,
+          operationRooms: 14
+        },
+        workingHours: {
+          monday: { open: '00:00', close: '23:59', closed: false },
+          tuesday: { open: '00:00', close: '23:59', closed: false },
+          wednesday: { open: '00:00', close: '23:59', closed: false },
+          thursday: { open: '00:00', close: '23:59', closed: false },
+          friday: { open: '00:00', close: '23:59', closed: false },
+          saturday: { open: '00:00', close: '23:59', closed: false },
+          sunday: { open: '00:00', close: '23:59', closed: false }
+        },
+        rating: { average: 4.5, count: 782 }
       }
     ];
     
@@ -464,8 +461,8 @@ const createDonors = async (users) => {
     const donorData = [
       {
         personalInfo: {
-          firstName: 'Rahul',
-          lastName: 'Sharma',
+          firstName: 'Rajesh',
+          lastName: 'Adhikari',
           dateOfBirth: new Date('1990-05-15'),
           gender: 'Male',
           bloodType: 'O+',
@@ -473,23 +470,23 @@ const createDonors = async (users) => {
           height: 175
         },
         contact: {
-          phone: '+91-9876543211',
+          phone: '+977-9841234567',
           emergencyContact: {
-            name: 'Sunita Sharma',
-            phone: '+91-9876543201',
+            name: 'Geeta Adhikari',
+            phone: '+977-9841234561',
             relationship: 'Mother'
           }
         },
         address: {
-          street: 'Block A, Connaught Place',
-          city: 'New Delhi',
-          state: 'Delhi',
-          zipCode: '110001',
-          country: 'India'
+          street: 'Thamel, Kathmandu',
+          city: 'Kathmandu',
+          state: 'Bagmati',
+          zipCode: '44600',
+          country: 'Nepal'
         },
         location: {
           type: 'Point',
-          coordinates: [77.2167, 28.6289]
+          coordinates: [85.3203, 27.7128]
         },
         donationPreferences: {
           bloodDonation: {
@@ -515,8 +512,8 @@ const createDonors = async (users) => {
       },
       {
         personalInfo: {
-          firstName: 'Priya',
-          lastName: 'Singh',
+          firstName: 'Sunita',
+          lastName: 'Thapa',
           dateOfBirth: new Date('1992-08-22'),
           gender: 'Female',
           bloodType: 'A+',
@@ -524,23 +521,23 @@ const createDonors = async (users) => {
           height: 160
         },
         contact: {
-          phone: '+91-9876543212',
+          phone: '+977-9842345678',
           emergencyContact: {
-            name: 'Rajesh Singh',
-            phone: '+91-9876543202',
+            name: 'Gopal Thapa',
+            phone: '+977-9842345671',
             relationship: 'Father'
           }
         },
         address: {
-          street: 'Lajpat Nagar IV',
-          city: 'New Delhi',
-          state: 'Delhi',
-          zipCode: '110024',
-          country: 'India'
+          street: 'Jorpati, Kathmandu',
+          city: 'Kathmandu',
+          state: 'Bagmati',
+          zipCode: '44610',
+          country: 'Nepal'
         },
         location: {
           type: 'Point',
-          coordinates: [77.2436, 28.5677]
+          coordinates: [85.3694, 27.7489]
         },
         donationPreferences: {
           bloodDonation: {
@@ -552,9 +549,6 @@ const createDonors = async (users) => {
           }
         },
         medicalHistory: {
-          }
-        ],
-        medicalHistory: {
           allergies: ['Penicillin'],
           medications: [],
           chronicConditions: [],
@@ -565,8 +559,8 @@ const createDonors = async (users) => {
       },
       {
         personalInfo: {
-          firstName: 'Amit',
-          lastName: 'Kumar',
+          firstName: 'Anuj',
+          lastName: 'Joshi',
           dateOfBirth: new Date('1988-12-03'),
           gender: 'Male',
           bloodType: 'B+',
@@ -574,23 +568,23 @@ const createDonors = async (users) => {
           height: 180
         },
         contact: {
-          phone: '+91-9876543213',
+          phone: '+977-9843456789',
           emergencyContact: {
-            name: 'Meera Kumar',
-            phone: '+91-9876543203',
+            name: 'Priya Joshi',
+            phone: '+977-9843456782',
             relationship: 'Wife'
           }
         },
         address: {
-          street: 'Karol Bagh Market',
-          city: 'New Delhi',
-          state: 'Delhi',
-          zipCode: '110005',
-          country: 'India'
+          street: 'Patan, Lalitpur',
+          city: 'Lalitpur',
+          state: 'Bagmati',
+          zipCode: '44700',
+          country: 'Nepal'
         },
         location: {
           type: 'Point',
-          coordinates: [77.1909, 28.6519]
+          coordinates: [85.3225, 27.6725]
         },
         donationPreferences: {
           bloodDonation: {
@@ -615,8 +609,8 @@ const createDonors = async (users) => {
       },
       {
         personalInfo: {
-          firstName: 'Sneha',
-          lastName: 'Patel',
+          firstName: 'Neha',
+          lastName: 'Shrestha',
           dateOfBirth: new Date('1995-03-18'),
           gender: 'Female',
           bloodType: 'AB+',
@@ -624,23 +618,23 @@ const createDonors = async (users) => {
           height: 165
         },
         contact: {
-          phone: '+91-9876543214',
+          phone: '+977-9844567890',
           emergencyContact: {
-            name: 'Kiran Patel',
-            phone: '+91-9876543204',
+            name: 'Ramesh Shrestha',
+            phone: '+977-9844567883',
             relationship: 'Mother'
           }
         },
         address: {
-          street: 'Sector 12, Dwarka',
-          city: 'New Delhi',
-          state: 'Delhi',
-          zipCode: '110078',
-          country: 'India'
+          street: 'Bhaktapur',
+          city: 'Bhaktapur',
+          state: 'Bagmati',
+          zipCode: '44800',
+          country: 'Nepal'
         },
         location: {
           type: 'Point',
-          coordinates: [77.0469, 28.5921]
+          coordinates: [85.4301, 27.6726]
         },
         donationPreferences: {
           bloodDonation: {
@@ -667,8 +661,8 @@ const createDonors = async (users) => {
       },
       {
         personalInfo: {
-          firstName: 'Vikash',
-          lastName: 'Gupta',
+          firstName: 'Vikram',
+          lastName: 'Karmacharya',
           dateOfBirth: new Date('1987-11-25'),
           gender: 'Male',
           bloodType: 'O-',
@@ -676,23 +670,23 @@ const createDonors = async (users) => {
           height: 178
         },
         contact: {
-          phone: '+91-9876543215',
+          phone: '+977-9845678901',
           emergencyContact: {
-            name: 'Pooja Gupta',
-            phone: '+91-9876543205',
+            name: 'Lakshmi Karmacharya',
+            phone: '+977-9845678894',
             relationship: 'Wife'
           }
         },
         address: {
-          street: 'Sector 7, Rohini',
-          city: 'New Delhi',
-          state: 'Delhi',
-          zipCode: '110085',
-          country: 'India'
+          street: 'Naxal, Kathmandu',
+          city: 'Kathmandu',
+          state: 'Bagmati',
+          zipCode: '44620',
+          country: 'Nepal'
         },
         location: {
           type: 'Point',
-          coordinates: [77.1025, 28.7041]
+          coordinates: [85.3275, 27.7245]
         },
         donationPreferences: {
           bloodDonation: {
@@ -835,7 +829,7 @@ const createEmergencyTickets = async (hospitals) => {
     const tickets = [];
     const ticketData = [
       {
-        hospital: hospitals[0]._id, // AIIMS
+        hospital: hospitals[0]._id, // Tribhuvan University Teaching Hospital
         type: 'blood',
         bloodType: 'O-',
         urgency: 'critical',
@@ -843,13 +837,13 @@ const createEmergencyTickets = async (hospitals) => {
         message: 'URGENT: Multiple accident victims need O- blood immediately. Critical situation in emergency ward.',
         location: {
           type: 'Point',
-          coordinates: [77.2090, 28.5672]
+          coordinates: [85.3326, 27.7372]
         },
         status: 'open',
         expiresAt: new Date(Date.now() + 6 * 60 * 60 * 1000) // 6 hours from now
       },
       {
-        hospital: hospitals[1]._id, // Apollo
+        hospital: hospitals[1]._id, // Nepal Medical College
         type: 'blood',
         bloodType: 'A+',
         urgency: 'high',
@@ -857,13 +851,13 @@ const createEmergencyTickets = async (hospitals) => {
         message: 'Urgent need for A+ blood for surgery patient. Please respond if available.',
         location: {
           type: 'Point',
-          coordinates: [77.2773, 28.5245]
+          coordinates: [85.3694, 27.7489]
         },
         status: 'open',
         expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000) // 12 hours from now
       },
       {
-        hospital: hospitals[2]._id, // Fortis
+        hospital: hospitals[2]._id, // Kathmandu Medical College
         type: 'organ',
         organType: 'Kidney',
         urgency: 'critical',
@@ -871,13 +865,13 @@ const createEmergencyTickets = async (hospitals) => {
         message: 'CRITICAL: Patient in kidney failure needs immediate transplant. Compatible donor urgently needed.',
         location: {
           type: 'Point',
-          coordinates: [77.3648, 28.6280]
+          coordinates: [85.4167, 27.6167]
         },
         status: 'open',
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
       },
       {
-        hospital: hospitals[3]._id, // Max
+        hospital: hospitals[3]._id, // Patan Academy of Health Sciences
         type: 'blood',
         bloodType: 'B-',
         urgency: 'medium',
@@ -885,13 +879,13 @@ const createEmergencyTickets = async (hospitals) => {
         message: 'Need B- blood for scheduled surgery tomorrow. Please help if you can donate.',
         location: {
           type: 'Point',
-          coordinates: [77.2167, 28.5245]
+          coordinates: [85.3225, 27.6725]
         },
         status: 'open',
         expiresAt: new Date(Date.now() + 18 * 60 * 60 * 1000) // 18 hours from now
       },
       {
-        hospital: hospitals[0]._id, // AIIMS
+        hospital: hospitals[0]._id, // Tribhuvan University Teaching Hospital
         type: 'blood',
         bloodType: 'AB+',
         urgency: 'high',
@@ -899,7 +893,7 @@ const createEmergencyTickets = async (hospitals) => {
         message: 'Cancer patient needs AB+ blood for chemotherapy. Urgent requirement.',
         location: {
           type: 'Point',
-          coordinates: [77.2090, 28.5672]
+          coordinates: [85.3326, 27.7372]
         },
         status: 'in_progress',
         expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000) // 8 hours from now
@@ -938,24 +932,24 @@ const seedDatabase = async () => {
     console.log('\n=== Database Seeding Completed Successfully! ===');
     console.log('\n🎯 COMPREHENSIVE DEMO DATA CREATED:');
     console.log('\n👤 Demo Accounts:');
-    console.log('Admin: admin@lifelink.com / admin123');
+    console.log('Admin: admin@vitalveins.com / admin123');
     console.log('\n🏥 Hospitals (with full inventory):');
-    console.log('- admin@aiims.edu / hospital123 (AIIMS - Highest inventory)');
-    console.log('- info@apollohospitals.com / hospital123 (Apollo - Large inventory)');
-    console.log('- contact@fortishealthcare.com / hospital123 (Fortis - Medium inventory)');
-    console.log('- info@maxhealthcare.com / hospital123 (Max - Good inventory)');
+    console.log('- admin@tuth.edu.np / hospital123 (Tribhuvan University Teaching Hospital - Highest inventory)');
+    console.log('- info@nmc.edu.np / hospital123 (Nepal Medical College - Large inventory)');
+    console.log('- contact@kmc.edu.np / hospital123 (Kathmandu Medical College - Medium inventory)');
+    console.log('- info@pahs.edu.np / hospital123 (Patan Academy of Health Sciences - Good inventory)');
     console.log('\n🩸 Donors (with donation history):');
-    console.log('- rahul.sharma@gmail.com / donor123 (O+ - 5 donations)');
-    console.log('- priya.singh@gmail.com / donor123 (A+ - 3 donations)');
-    console.log('- amit.kumar@gmail.com / donor123 (B+)');
-    console.log('- sneha.patel@gmail.com / donor123 (AB+)');
-    console.log('- vikash.gupta@gmail.com / donor123 (O-)');
+    console.log('- rajesh.adhikari@gmail.com / donor123 (O+ - 5 donations)');
+    console.log('- sunita.thapa@gmail.com / donor123 (A+ - 3 donations)');
+    console.log('- anuj.joshi@gmail.com / donor123 (B+)');
+    console.log('- neha.shrestha@gmail.com / donor123 (AB+)');
+    console.log('- vikram.karmacharya@gmail.com / donor123 (O-)');
     console.log('\n📊 Data Created:');
     console.log('✅ Hospital Inventory: All blood types (10-195 units each)');
     console.log('✅ Organ Inventory: Heart, Liver, Kidney, Lung, Pancreas, Cornea, Skin, Bone');
     console.log('✅ Sample Appointments: 7 appointments with different statuses');
     console.log('✅ Emergency Tickets: 5 urgent blood/organ requests');
-    console.log('✅ Geographic Data: Delhi NCR locations for testing');
+    console.log('✅ Geographic Data: Nepal locations for testing');
     
     process.exit(0);
   } catch (error) {

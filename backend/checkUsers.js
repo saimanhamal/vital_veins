@@ -5,7 +5,7 @@ const User = require('./models/User');
 
 const checkUsers = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lifelink');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins');
     console.log('✅ Connected to MongoDB');
     
     const allUsers = await User.find({});

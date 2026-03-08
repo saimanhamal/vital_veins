@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const runTest = async () => {
   try {
-    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/lifelink';
+    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins';
     console.log(`Using MongoDB URI: ${uri}`);
     await mongoose.connect(uri);
     console.log('✅ Connected to MongoDB');

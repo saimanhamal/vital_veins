@@ -10,6 +10,7 @@ const Transaction = require('../models/Transaction');
 const emailService = require('../services/emailService');
 const { authenticate, authorize } = require('../middleware/auth');
 const { validateObjectId, validatePagination } = require('../middleware/validation');
+const { validateMarkNoShow, validateAdminCancelAppointment } = require('../middleware/appointmentValidation');
 
 // Apply authentication and admin authorization to all routes
 router.use(authenticate);
@@ -1689,6 +1690,203 @@ router.get('/reports', async (req, res) => {
     console.error('Report generation error:', error);
     res.status(500).json({
       message: 'Server error generating report',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+/**
+ * @route   PUT /api/admin/appointments/:id/mark-no-show
+ * @desc    Mark appointment as no_show (donor didn't arrive)
+ * @access  Private (Admin only)
+ */
+router.put(
+  '/appointments/:id/mark-no-show',
+  authenticate,
+  authorize('admin'),
+  validateObjectId('id'),
+  validateMarkNoShow,
+  async (req, res) => {
+  try {
+    const { reason } = req.body;
+    const appointmentId = req.params.id;
+
+    const appointment = await Appointment.findById(appointmentId)
+      .populate('donor', 'personalInfo user appointmentMetrics')
+      .populate('hospital', 'hospitalName user');
+
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found' });
+    }
+
+    // Only pending or confirmed appointments can be marked as no_show
+    if (!['pending', 'confirmed'].includes(appointment.status)) {
+      return res.status(400).json({ 
+        message: `Cannot mark ${appointment.status} appointment as no_show`,
+        currentStatus: appointment.status
+      });
+    }
+
+    // Update status to no_show
+    appointment.status = 'no_show';
+    if (reason) {
+      appointment.notes.admin = `No Show marked by admin: ${reason}`;
+    } else {
+      appointment.notes.admin = 'No Show marked by admin: Donor did not arrive';
+    }
+    await appointment.save();
+
+    // Update donor metrics
+    const donor = appointment.donor;
+    if (donor && donor.appointmentMetrics) {
+      donor.appointmentMetrics.noShowCount = (donor.appointmentMetrics.noShowCount || 0) + 1;
+      
+      // Flag donor if no_show count exceeds threshold (e.g., 3 no-shows in 30 days)
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const recentNoShows = await Appointment.countDocuments({
+        donor: donor._id,
+        status: 'no_show',
+        createdAt: { $gte: thirtyDaysAgo }
+      });
+
+      if (recentNoShows >= 3) {
+        donor.appointmentMetrics.flaggedForReview = true;
+        donor.appointmentMetrics.flagReason = 'Multiple no-shows in 30 days';
+      }
+      
+      await donor.save();
+    }
+
+    // Send notification to donor
+    await Notification.createNotification({
+      sender: req.user._id,
+      recipients: [{
+        userId: appointment.donor.user,
+        role: 'donor'
+      }],
+      type: 'appointment_no_show',
+      title: 'Appointment Marked as No Show',
+      message: `Your appointment at ${appointment.hospital.hospitalName} on ${new Date(appointment.scheduledDate).toLocaleDateString()} has been marked as no show.`,
+      priority: 'high',
+      category: 'warning',
+      data: { appointmentId: appointment._id }
+    });
+
+    // Real-time notification
+    if (req.io) {
+      req.io.to(`donor_${appointment.donor.user}`).emit('appointment_no_show', {
+        appointmentId: appointment._id,
+        message: 'Your appointment has been marked as no show',
+        timestamp: new Date()
+      });
+    }
+
+    res.json({
+      message: 'Appointment marked as no_show successfully',
+      appointment,
+      donorMetrics: {
+        noShowCount: donor.appointmentMetrics.noShowCount,
+        flaggedForReview: donor.appointmentMetrics.flaggedForReview
+      }
+    });
+  } catch (error) {
+    console.error('Mark no-show error:', error);
+    res.status(500).json({
+      message: 'Server error marking appointment as no_show',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+/**
+ * @route   PUT /api/admin/appointments/:id/cancel-admin
+ * @desc    Cancel appointment with admin override (includes cancellation record)
+ * @access  Private (Admin only)
+ */
+router.put(
+  '/appointments/:id/cancel-admin',
+  authenticate,
+  authorize('admin'),
+  validateObjectId('id'),
+  validateAdminCancelAppointment,
+  async (req, res) => {
+  try {
+    const { reason = 'Cancelled by admin' } = req.body;
+    const appointmentId = req.params.id;
+
+    const appointment = await Appointment.findById(appointmentId)
+      .populate('donor', 'personalInfo user appointmentMetrics')
+      .populate('hospital', 'hospitalName user');
+
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found' });
+    }
+
+    // Only pending or confirmed appointments can be cancelled
+    if (!['pending', 'confirmed', 'approved'].includes(appointment.status)) {
+      return res.status(400).json({ 
+        message: `Cannot cancel ${appointment.status} appointment`,
+        currentStatus: appointment.status
+      });
+    }
+
+    // Record cancellation
+    appointment.status = 'cancelled';
+    appointment.cancellation = {
+      reason: reason,
+      cancelledBy: req.user._id,
+      cancelledAt: new Date()
+    };
+    appointment.notes.admin = `Cancelled by admin: ${reason}`;
+    await appointment.save();
+
+    // Send notification to both parties
+    await Notification.createNotification({
+      sender: req.user._id,
+      recipients: [
+        {
+          userId: appointment.donor.user,
+          role: 'donor'
+        },
+        {
+          userId: appointment.hospital.user,
+          role: 'hospital'
+        }
+      ],
+      type: 'appointment_cancelled_admin',
+      title: 'Appointment Cancelled by Administrator',
+      message: `Your appointment has been cancelled by administrator. Reason: ${reason}`,
+      priority: 'medium',
+      category: 'info',
+      data: { appointmentId: appointment._id }
+    });
+
+    // Real-time notifications
+    if (req.io) {
+      req.io.to(`donor_${appointment.donor.user}`).emit('appointment_cancelled_admin', {
+        appointmentId: appointment._id,
+        reason: reason,
+        message: 'Your appointment has been cancelled by administrator',
+        timestamp: new Date()
+      });
+
+      req.io.to(`hospital_${appointment.hospital.user}`).emit('appointment_cancelled_admin', {
+        appointmentId: appointment._id,
+        donorName: `${appointment.donor.personalInfo.firstName} ${appointment.donor.personalInfo.lastName}`,
+        reason: reason,
+        timestamp: new Date()
+      });
+    }
+
+    res.json({
+      message: 'Appointment cancelled by administrator successfully',
+      appointment,
+      cancellation: appointment.cancellation
+    });
+  } catch (error) {
+    console.error('Admin cancel appointment error:', error);
+    res.status(500).json({
+      message: 'Server error cancelling appointment',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }

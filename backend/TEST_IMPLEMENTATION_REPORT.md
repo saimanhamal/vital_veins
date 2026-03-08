@@ -356,7 +356,7 @@ backend/
 ### 3. `.env.test`
 ```env
 NODE_ENV=test
-MONGODB_URI=mongodb://localhost:27017/lifelink_test
+MONGODB_URI=mongodb://localhost:27017/vitalveins_test
 JWT_SECRET=test_jwt_secret_key_for_testing_purposes_only
 JWT_EXPIRE=7d
 PORT=5001

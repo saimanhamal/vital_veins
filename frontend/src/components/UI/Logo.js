@@ -1,7 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
-const Logo = ({ size = 'medium', variant = 'full' }) => {
+const Logo = ({ size = 'medium', variant = 'full', clickable = true }) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   // Size configurations
   const sizeConfig = {
     small: {
@@ -25,6 +29,21 @@ const Logo = ({ size = 'medium', variant = 'full' }) => {
   };
 
   const config = sizeConfig[size] || sizeConfig.medium;
+
+  const handleLogoClick = () => {
+    if (clickable && user) {
+      // Navigate based on user role
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else if (user.role === 'hospital') {
+        navigate('/hospital/dashboard');
+      } else if (user.role === 'donor') {
+        navigate('/donor/dashboard');
+      }
+    } else if (clickable && !user) {
+      navigate('/');
+    }
+  };
 
   // Logo icon - stylized heart with droplets
   const LogoIcon = () => (
@@ -70,7 +89,8 @@ const Logo = ({ size = 'medium', variant = 'full' }) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex items-center space-x-3"
+      className={`flex items-center space-x-3 ${clickable ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+      onClick={handleLogoClick}
     >
       <div className={`${config.logoSize} bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
         <LogoIcon />

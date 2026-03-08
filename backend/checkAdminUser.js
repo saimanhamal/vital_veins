@@ -3,11 +3,11 @@ const User = require('./models/User');
 
 async function checkAdmin() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lifelink');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins');
     console.log('✅ Connected to MongoDB\n');
 
     // Check if admin exists
-    const admin = await User.findOne({ email: 'admin@lifelink.com' });
+    const admin = await User.findOne({ email: 'admin@vitalveins.com' });
     
     if (admin) {
       console.log('✅ Admin user found:');
@@ -20,7 +20,7 @@ async function checkAdmin() {
       
       const newAdmin = new User({
         name: 'Admin',
-        email: 'admin@lifelink.com',
+        email: 'admin@vitalveins.com',
         password: 'Admin123',
         role: 'admin',
         phone: '9000000000',

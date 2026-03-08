@@ -11,7 +11,7 @@ const Appointment = require('../models/Appointment');
 const Notification = require('../models/Notification');
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lifelink', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -34,7 +34,7 @@ const seedData = async () => {
     // Create Admin User
     const adminUser = new User({
       name: 'Admin User',
-      email: 'admin@lifelink.com',
+      email: 'admin@vitalveins.com',
       password: 'admin123',
       role: 'admin',
       verified: true,
@@ -500,8 +500,8 @@ const seedData = async () => {
           { userId: createdHospitals[1].user, role: 'hospital' }
         ],
         type: 'system_announcement',
-        title: 'Welcome to LifeLink',
-        message: 'Welcome to the LifeLink platform! You can now start managing your donations and connecting with donors.',
+        title: 'Welcome to VitalVeins',
+        message: 'Welcome to the VitalVeins platform! You can now start managing your donations and connecting with donors.',
         priority: 'medium',
         category: 'info'
       },
@@ -514,7 +514,7 @@ const seedData = async () => {
         ],
         type: 'system_announcement',
         title: 'Thank You for Joining',
-        message: 'Thank you for joining LifeLink! Your donations can save lives. Check out nearby hospitals and emergency requests.',
+        message: 'Thank you for joining VitalVeins! Your donations can save lives. Check out nearby hospitals and emergency requests.',
         priority: 'medium',
         category: 'info'
       }
@@ -535,7 +535,7 @@ const seedData = async () => {
     console.log(`🔔 Notifications: ${notifications.length}`);
     
     console.log('\n🔑 Login Credentials (Nepal Localization):');
-    console.log('Admin: admin@lifelink.com / admin123');
+    console.log('Admin: admin@vitalveins.com / admin123');
     console.log('Hospital 1: ramesh.kumar@tribhuvan-hospital.com.np / hospital123');
     console.log('Hospital 2: priya.lama@manipal-pokhara.com.np / hospital123');
     console.log('Donor 1: rajesh.poudel@email.com.np / donor123 ✅ (Active - Can Login)');
