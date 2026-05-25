@@ -101,3 +101,6 @@ logs
 # Database
 *.sqlite
 *.db
+
+*.md
+!README.md
