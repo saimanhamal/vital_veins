@@ -33,36 +33,36 @@ const completeSeed = async () => {
     console.log('🏥 Creating hospital users...');
     const hospitalUserData = [
       {
-        name: 'AIIMS Delhi',
-        email: 'admin@aiims.edu',
+        name: 'Kathmandu Medical College Teaching Hospital',
+        email: 'admin@kmcth.edu.np',
         password: 'hospital123',
-        phone: '+91-11-26588500',
-        address: 'Ansari Nagar, New Delhi',
-        coordinates: [77.2090, 28.5672]
+        phone: '+977-1-4418006',
+        address: 'Sinamangal, Kathmandu',
+        coordinates: [85.3390, 27.6896]
       },
       {
-        name: 'Apollo Hospital',
-        email: 'info@apollohospitals.com',
+        name: 'Civil Hospital Kathmandu',
+        email: 'info@civlhospital.gov.np',
         password: 'hospital123',
-        phone: '+91-11-71791000',
-        address: 'Sarita Vihar, New Delhi',
-        coordinates: [77.2773, 28.5245]
+        phone: '+977-1-4118099',
+        address: 'Thapathali, Kathmandu',
+        coordinates: [85.3125, 27.6915]
       },
       {
-        name: 'Fortis Hospital',
-        email: 'contact@fortishealthcare.com',
+        name: 'Tribhuvan University Teaching Hospital',
+        email: 'contact@tuth.edu.np',
         password: 'hospital123',
-        phone: '+91-11-42776222',
-        address: 'Sector 62, Noida',
-        coordinates: [77.3648, 28.6280]
+        phone: '+977-1-4412303',
+        address: 'Maharajgunj, Kathmandu',
+        coordinates: [85.3265, 27.7204]
       },
       {
-        name: 'Max Hospital',
-        email: 'info@maxhealthcare.com',
+        name: 'Nepal Medical College Teaching Hospital',
+        email: 'info@nmcth.edu.np',
         password: 'hospital123',
-        phone: '+91-11-26925801',
-        address: 'Saket, New Delhi',
-        coordinates: [77.2167, 28.5245]
+        phone: '+977-1-4903060',
+        address: 'Jorpati, Kathmandu',
+        coordinates: [85.3543, 27.7095]
       }
     ];
     
@@ -99,26 +99,26 @@ const completeSeed = async () => {
     console.log('\n🏥 Creating hospitals with inventory...');
     const hospitalData = [
       {
-        hospitalName: 'All India Institute of Medical Sciences (AIIMS)',
-        license: 'AIIMS-DL-001',
+        hospitalName: 'Kathmandu Medical College Teaching Hospital',
+        license: 'KMCTH-KTM-001',
         status: 'approved',
         specialization: ['General', 'Cardiology', 'Neurology', 'Emergency', 'Transplant']
       },
       {
-        hospitalName: 'Apollo Hospital Delhi',
-        license: 'APL-DL-002',
+        hospitalName: 'Civil Hospital Kathmandu',
+        license: 'CHK-KTM-002',
         status: 'approved',
         specialization: ['General', 'Cardiology', 'Oncology', 'Emergency']
       },
       {
-        hospitalName: 'Fortis Hospital Noida',
-        license: 'FRT-UP-003',
+        hospitalName: 'Tribhuvan University Teaching Hospital',
+        license: 'TUTH-KTM-003',
         status: 'approved',
         specialization: ['General', 'Cardiology', 'Neurology', 'Pediatrics']
       },
       {
-        hospitalName: 'Max Super Speciality Hospital',
-        license: 'MAX-DL-004',
+        hospitalName: 'Nepal Medical College Teaching Hospital',
+        license: 'NMCTH-KTM-004',
         status: 'approved',
         specialization: ['General', 'Cardiology', 'Transplant', 'Emergency']
       }
@@ -134,10 +134,10 @@ const completeSeed = async () => {
         },
         address: {
           street: hospitalUsers[i].address,
-          city: 'New Delhi',
-          state: 'Delhi',
-          zipCode: '110001',
-          country: 'India'
+          city: 'Kathmandu',
+          state: 'Bagmati',
+          zipCode: '44600',
+          country: 'Nepal'
         },
         contact: {
           phone: hospitalUsers[i].phone,
@@ -203,28 +203,28 @@ const completeSeed = async () => {
     console.log('\n🩸 Creating donor users...');
     const donorUserData = [
       {
-        name: 'Rahul Sharma',
-        email: 'rahul.sharma@gmail.com',
+        name: 'Ramesh Gurung',
+        email: 'ramesh.gurung@gmail.com',
         password: 'donor123',
-        phone: '+91-9876543211',
-        address: 'Connaught Place, Delhi',
-        coordinates: [77.2167, 28.6289]
+        phone: '+977-9841234567',
+        address: 'Thamel, Kathmandu',
+        coordinates: [85.3205, 27.7172]
       },
       {
-        name: 'Priya Singh',
-        email: 'priya.singh@gmail.com',
+        name: 'Surajnaa Sharma',
+        email: 'surajnaa.sharma@gmail.com',
         password: 'donor123',
-        phone: '+91-9876543212',
-        address: 'Lajpat Nagar, Delhi',
-        coordinates: [77.2436, 28.5677]
+        phone: '+977-9812345678',
+        address: 'Boudha, Kathmandu',
+        coordinates: [85.3572, 27.7212]
       },
       {
-        name: 'Amit Kumar',
-        email: 'amit.kumar@gmail.com',
+        name: 'Arjun Thapa',
+        email: 'arjun.thapa@gmail.com',
         password: 'donor123',
-        phone: '+91-9876543213',
-        address: 'Karol Bagh, Delhi',
-        coordinates: [77.1909, 28.6519]
+        phone: '+977-9823456789',
+        address: 'Patan Durbar Square, Lalitpur',
+        coordinates: [85.3273, 27.6745]
       }
     ];
     
@@ -259,8 +259,8 @@ const completeSeed = async () => {
     const donorProfileData = [
       {
         personalInfo: {
-          firstName: 'Rahul',
-          lastName: 'Sharma',
+          firstName: 'Ramesh',
+          lastName: 'Gurung',
           dateOfBirth: new Date('1990-05-15'),
           gender: 'Male',
           bloodType: 'O+',
@@ -271,8 +271,8 @@ const completeSeed = async () => {
       },
       {
         personalInfo: {
-          firstName: 'Priya',
-          lastName: 'Singh',
+          firstName: 'Surajnaa',
+          lastName: 'Sharma',
           dateOfBirth: new Date('1992-08-22'),
           gender: 'Female',
           bloodType: 'A+',
@@ -283,8 +283,8 @@ const completeSeed = async () => {
       },
       {
         personalInfo: {
-          firstName: 'Amit',
-          lastName: 'Kumar',
+          firstName: 'Arjun',
+          lastName: 'Thapa',
           dateOfBirth: new Date('1988-12-03'),
           gender: 'Male',
           bloodType: 'B+',

@@ -3,17 +3,14 @@ const router = express.Router();
 const User = require('../models/User');
 const Hospital = require('../models/Hospital');
 const Donor = require('../models/Donor');
-const Notification = require('../models/Notification');
 const { authenticate, authorize } = require('../middleware/auth');
 const { validateUserRegistration, validateUserLogin } = require('../middleware/validation');
-const bcrypt = require('bcryptjs');
 
 // @route   POST /api/auth/register
 // @desc    Register a new user
 // @access  Public
 router.post('/register', validateUserRegistration, async (req, res) => {
   try {
-    console.log('📥 Registration request body:', JSON.stringify(req.body));
     const { name, email, password, role, ...additionalData } = req.body;
 
     // Check if user already exists
@@ -24,17 +21,15 @@ router.post('/register', validateUserRegistration, async (req, res) => {
       });
     }
 
-    // Create user - new donors start as unverified (pending)
+    // Create user
     const user = new User({
       name,
       email,
       password,
-      role,
-      verified: role === 'donor' ? false : true  // Donors need verification, others don't
+      role
     });
 
     await user.save();
-    console.log(`📝 User created: ${user.email}, verified: ${user.verified}, role: ${role}`);
 
     // Create role-specific profile
     if (role === 'hospital') {
@@ -42,120 +37,32 @@ router.post('/register', validateUserRegistration, async (req, res) => {
         user: user._id,
         hospitalName: additionalData.hospitalName || name,
         license: additionalData.license || '',
-        address: additionalData.address || {
-          street: 'N/A', city: 'N/A', state: 'N/A', zipCode: '00000', country: 'N/A'
-        },
+        address: additionalData.address || {},
         location: additionalData.location || { type: 'Point', coordinates: [0, 0] },
-        contact: additionalData.contact || { phone: additionalData.phone || '+0000000000', email },
+        contact: additionalData.contact || { phone: '', email },
         status: 'pending'
       });
       await hospital.save();
-      
-      // Create notification for admin about new hospital registration
-      const adminUsers = await User.find({ role: 'admin' });
-      if (adminUsers.length > 0) {
-        const notification = new Notification({
-          notificationId: `hospital_reg_${Date.now()}`,
-          sender: user._id,
-          recipients: adminUsers.map(admin => ({
-            user: admin._id,
-            role: 'admin',
-            read: false
-          })),
-          type: 'hospital_registered',
-          title: 'New Hospital Registration',
-          message: `${hospital.hospitalName} has registered and is pending approval`,
-          data: {
-            hospitalId: hospital._id,
-            hospitalName: hospital.hospitalName
-          },
-          priority: 'high'
-        });
-        await notification.save();
-        
-        // Send notification via socket if available
-        if (req.io) {
-          adminUsers.forEach(admin => {
-            req.io.to(`user_${admin._id}`).emit('notification', {
-              type: 'hospital_registered',
-              message: `${hospital.hospitalName} has registered and is pending approval`
-            });
-          });
-        }
-      }
     } else if (role === 'donor') {
-      // Create donor profile immediately using provided personalInfo or sensible defaults
-      try {
-        const personalInfo = additionalData.personalInfo || {};
-        const donor = new Donor({
-          user: user._id,
-          personalInfo: {
-            firstName: personalInfo.firstName || (user.name ? user.name.split(' ')[0] : ''),
-            lastName: personalInfo.lastName || (user.name ? (user.name.split(' ')[1] || '') : ''),
-            dateOfBirth: personalInfo.dateOfBirth || new Date('1970-01-01'),
-            gender: (personalInfo.gender || 'other').toString().toLowerCase(),
-            bloodType: personalInfo.bloodType || 'O+',
-            weight: personalInfo.weight || 70,
-            height: personalInfo.height || 170
-          },
-          contact: additionalData.contact || {
-            phone: additionalData.phone || '+0000000000',
-            emergencyContact: {
-              name: 'Not provided',
-              phone: '+0000000000',
-              relationship: 'Unknown'
-            }
-          },
-          address: additionalData.address || {
-            street: 'N/A',
-            city: 'N/A',
-            state: 'N/A',
-            zipCode: '00000',
-            country: 'India'
-          },
-          location: additionalData.location || { type: 'Point', coordinates: [0, 0] },
-          status: 'pending',
-          isActive: true
-        });
-        await donor.save();
-        console.log(`✅ Created donor profile (pending) for: ${user.email}`);
-      } catch (createErr) {
-        console.error('Failed to create donor profile on registration:', createErr);
-      }
+      const donor = new Donor({
+        user: user._id,
+        personalInfo: additionalData.personalInfo || {},
+        contact: additionalData.contact || {},
+        address: additionalData.address || {},
+        location: additionalData.location || { type: 'Point', coordinates: [0, 0] },
+        donationPreferences: {
+          bloodDonation: { eligible: true },
+          organDonation: { consent: false, organs: [] }
+        }
+      });
+      await donor.save();
     }
 
     // Generate token
     const token = user.generateAuthToken();
 
-    // Send confirmation notification for hospital registration
-    if (role === 'hospital') {
-      // Create a confirmation notification for the hospital
-      const confirmationNotification = new Notification({
-        notificationId: `hospital_confirm_${Date.now()}`,
-        sender: user._id, // Self-notification
-        recipients: [{
-          user: user._id,
-          role: 'hospital',
-          read: false
-        }],
-        type: 'general',
-        title: 'Registration Received',
-        message: 'Your hospital registration has been received and is pending admin approval.',
-        priority: 'medium'
-      });
-      await confirmationNotification.save();
-      
-      // Send notification via socket if available
-      if (req.io) {
-        req.io.to(`user_${user._id}`).emit('notification', {
-          type: 'general',
-          message: 'Your hospital registration has been received and is pending admin approval.'
-        });
-      }
-    }
-
     res.status(201).json({
-      message: 'Thank you for joining! Verification is underway.',
+      message: 'User registered successfully',
       token,
       user: {
         id: user._id,
@@ -168,7 +75,7 @@ router.post('/register', validateUserRegistration, async (req, res) => {
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({
-      message: 'Server error during registration',
+      message: 'Try Logging in at a later time',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
@@ -180,47 +87,26 @@ router.post('/register', validateUserRegistration, async (req, res) => {
 router.post('/login', validateUserLogin, async (req, res) => {
   try {
     const { email, password } = req.body;
-    
-    console.log(`🔐 Login attempt: ${email}`);
-    console.log(`🔐 Request body:`, req.body);
 
     // Find user and include password for comparison
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
-      console.log(`❌ User not found: ${email}`);
       return res.status(401).json({
         message: 'Invalid email or password'
       });
     }
-    
-    console.log(`✅ User found: ${user.name} (Role: ${user.role})`);
-    console.log(`📊 User active: ${user.isActive}, verified: ${user.verified}`);
-    console.log(`📊 User password hash: ${user.password}`);
 
     // Check if account is active
     if (!user.isActive) {
-      console.log(`❌ Account inactive: ${email}`);
       return res.status(401).json({
         message: 'Account is deactivated. Please contact support.'
       });
     }
 
-    // Check password using direct bcrypt comparison
-    console.log(`🔍 Checking password for: ${email}`);
-    console.log(`🔍 Password hash exists: ${user.password ? 'Yes' : 'No'}`);
-    
-    if (!user.password) {
-      console.log(`❌ No password hash found for: ${email}`);
-      return res.status(401).json({
-        message: 'Invalid email or password'
-      });
-    }
-    
+    // Check password - TEMPORARY FIX FOR DONOR LOGIN
+    const bcrypt = require('bcryptjs');
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    console.log(`🔐 Password valid: ${isPasswordValid} for ${email}`);
-    
     if (!isPasswordValid) {
-      console.log(`❌ Invalid password for: ${email}`);
       return res.status(401).json({
         message: 'Invalid email or password'
       });
@@ -228,93 +114,12 @@ router.post('/login', validateUserLogin, async (req, res) => {
 
     // For hospitals, check approval status
     if (user.role === 'hospital') {
-      let hospital = await Hospital.findOne({ user: user._id });
-      
-      // If no hospital profile exists, create one
-      if (!hospital) {
-        console.log(`⚠️  No hospital profile found, creating default profile for: ${email}`);
-        try {
-          hospital = new Hospital({
-            user: user._id,
-            hospitalName: user.name || 'Hospital',
-            license: '',
-            address: {},
-            location: { type: 'Point', coordinates: [0, 0] },
-            contact: { phone: user.phone || '', email: user.email },
-            status: 'pending'
-          });
-          await hospital.save();
-          console.log(`✅ Created default hospital profile for: ${email}`);
-        } catch (err) {
-          console.error(`❌ Failed to create hospital profile: ${err.message}`);
-          return res.status(500).json({ message: 'Failed to create hospital profile' });
-        }
-      }
-      
-      // Check approval status
-      if (hospital.status !== 'approved') {
-        console.log(`⏳ Hospital not approved: ${email} (status: ${hospital.status})`);
+      const hospital = await Hospital.findOne({ user: user._id });
+      if (hospital && hospital.status !== 'approved') {
         return res.status(401).json({
-          message: 'Hospital account is pending approval. Please wait for admin review.',
+          message: 'Hospital account is pending approval',
           status: hospital.status
         });
-      }
-    }
-
-    // For donors, check approval status (pending validation)
-    if (user.role === 'donor') {
-      const donor = await Donor.findOne({ user: user._id });
-      
-      // Check if donor is pending
-      if (donor && donor.status === 'pending') {
-        console.log(`⏳ Donor account pending approval: ${email}`);
-        return res.status(403).json({
-          message: 'Your account is under verification. Admin will review your profile soon.',
-          status: 'pending',
-          hint: 'Please check back later or contact support for updates'
-        });
-      }
-
-      if (!donor) {
-        console.log(`⚠️ No donor profile found for: ${email}`);
-        // Create a minimal donor profile that satisfies required schema fields
-        try {
-          const newDonor = new Donor({
-            user: user._id,
-            personalInfo: {
-              firstName: user.name ? user.name.split(' ')[0] : 'Donor',
-              lastName: user.name ? (user.name.split(' ')[1] || '') : '',
-              dateOfBirth: new Date('1970-01-01'),
-              gender: 'Other',
-              bloodType: 'O+',
-              weight: 70,
-              height: 170
-            },
-            contact: {
-              phone: '+0000000000',
-              emergencyContact: {
-                name: 'Not provided',
-                phone: '+0000000000',
-                relationship: 'Unknown'
-              }
-            },
-            address: {
-              street: 'N/A',
-              city: 'N/A',
-              state: 'N/A',
-              zipCode: '00000',
-              country: 'India'
-            },
-            location: { type: 'Point', coordinates: [0, 0] },
-            status: 'pending'
-          });
-          await newDonor.save();
-          console.log(`✅ Created minimal donor profile (pending) for: ${email}`);
-        } catch (createErr) {
-          console.error('Failed to create donor profile on login:', createErr);
-        }
-      } else {
-        console.log(`✅ Donor profile found for: ${email}`);
       }
     }
 
@@ -324,8 +129,16 @@ router.post('/login', validateUserLogin, async (req, res) => {
 
     // Generate token
     const token = user.generateAuthToken();
-    
-    console.log(`✅ Login successful: ${email}`);
+
+    // Get additional profile data based on role
+    let profileData = {};
+    if (user.role === 'hospital') {
+      const hospital = await Hospital.findOne({ user: user._id });
+      profileData = hospital ? { hospitalId: hospital._id, status: hospital.status } : {};
+    } else if (user.role === 'donor') {
+      const donor = await Donor.findOne({ user: user._id });
+      profileData = donor ? { donorId: donor._id, donorCode: donor.donorId } : {};
+    }
 
     res.json({
       message: 'Login successful',
@@ -335,7 +148,8 @@ router.post('/login', validateUserLogin, async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        verified: user.verified
+        verified: user.verified,
+        ...profileData
       }
     });
   } catch (error) {
@@ -347,18 +161,44 @@ router.post('/login', validateUserLogin, async (req, res) => {
   }
 });
 
-// @route   POST /api/auth/logout
-// @desc    Logout user
+// @route   GET /api/auth/me
+// @desc    Get current user profile
 // @access  Private
-router.post('/logout', authenticate, async (req, res) => {
+router.get('/me', authenticate, async (req, res) => {
   try {
-    // In a real application, you might want to blacklist the token
-    // For now, we'll just send a success response
-    res.json({ message: 'Logged out' });
+    const user = req.user;
+    
+    // Get additional profile data based on role
+    let profileData = {};
+    if (user.role === 'hospital') {
+      const hospital = await Hospital.findOne({ user: user._id })
+        .populate('user', 'name email phone address');
+      profileData = hospital ? { hospitalProfile: hospital } : {};
+    } else if (user.role === 'donor') {
+      const donor = await Donor.findOne({ user: user._id })
+        .populate('user', 'name email phone address');
+      profileData = donor ? { donorProfile: donor } : {};
+    }
+
+    res.json({
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        verified: user.verified,
+        phone: user.phone,
+        address: user.address,
+        location: user.location,
+        avatar: user.avatar,
+        lastLogin: user.lastLogin,
+        ...profileData
+      }
+    });
   } catch (error) {
-    console.error('Logout error:', error);
+    console.error('Profile fetch error:', error);
     res.status(500).json({
-      message: 'Server error during logout',
+      message: 'Server error fetching profile',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
@@ -404,11 +244,15 @@ router.put('/change-password', authenticate, async (req, res) => {
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ message: 'Current password and new password are required' });
+      return res.status(400).json({
+        message: 'Current password and new password are required'
+      });
     }
 
     if (newPassword.length < 6) {
-      return res.status(400).json({ message: 'New password must be at least 6 characters long' });
+      return res.status(400).json({
+        message: 'New password must be at least 6 characters long'
+      });
     }
 
     // Get user with password
@@ -417,14 +261,18 @@ router.put('/change-password', authenticate, async (req, res) => {
     // Verify current password
     const isCurrentPasswordValid = await user.comparePassword(currentPassword);
     if (!isCurrentPasswordValid) {
-      return res.status(400).json({ message: 'Current password is incorrect' });
+      return res.status(400).json({
+        message: 'Current password is incorrect'
+      });
     }
 
     // Update password
     user.password = newPassword;
     await user.save();
 
-    res.json({ message: 'Password changed successfully' });
+    res.json({
+      message: 'Password changed successfully'
+    });
   } catch (error) {
     console.error('Password change error:', error);
     res.status(500).json({
@@ -432,6 +280,46 @@ router.put('/change-password', authenticate, async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
+});
+
+// @route   POST /api/auth/verify-email
+// @desc    Verify user email (placeholder for email verification)
+// @access  Private
+router.post('/verify-email', authenticate, async (req, res) => {
+  try {
+    // In a real application, this would send a verification email
+    // For now, we'll just mark the user as verified
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { verified: true },
+      { new: true }
+    );
+
+    res.json({
+      message: 'Email verification initiated. Please check your email.',
+      user: {
+        id: user._id,
+        verified: user.verified
+      }
+    });
+  } catch (error) {
+    console.error('Email verification error:', error);
+    res.status(500).json({
+      message: 'Server error initiating email verification',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// @route   POST /api/auth/logout
+// @desc    Logout user (client-side token removal)
+// @access  Private
+router.post('/logout', authenticate, (req, res) => {
+  // In a stateless JWT system, logout is handled client-side
+  // You could implement token blacklisting here if needed
+  res.json({
+    message: 'Logged out successfully'
+  });
 });
 
 // @route   GET /api/auth/check-role/:role
@@ -446,84 +334,6 @@ router.get('/check-role/:role', authenticate, (req, res) => {
     userRole: req.user.role,
     message: hasRole ? `User has ${role} role` : `User does not have ${role} role`
   });
-});
-
-// @route   GET /api/auth/me
-// @desc    Get current user
-// @access  Private
-router.get('/me', authenticate, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    res.json({
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        verified: user.verified,
-        isActive: user.isActive,
-        lastLogin: user.lastLogin
-      }
-    });
-  } catch (error) {
-    console.error('Get user error:', error);
-    res.status(500).json({
-      message: 'Server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
-    });
-  }
-});
-
-// @route   PUT /api/auth/verify/:token
-// @desc    Verify user email
-// @access  Public
-router.put('/verify/:token', async (req, res) => {
-  try {
-    // Implementation for email verification
-    res.json({ message: 'Email verification endpoint' });
-  } catch (error) {
-    console.error('Verification error:', error);
-    res.status(500).json({
-      message: 'Server error during verification',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
-    });
-  }
-});
-
-// @route   POST /api/auth/forgot-password
-// @desc    Request password reset
-// @access  Public
-router.post('/forgot-password', async (req, res) => {
-  try {
-    // Implementation for password reset request
-    res.json({ message: 'Password reset endpoint' });
-  } catch (error) {
-    console.error('Forgot password error:', error);
-    res.status(500).json({
-      message: 'Server error during password reset request',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
-    });
-  }
-});
-
-// @route   POST /api/auth/reset-password
-// @desc    Reset password
-// @access  Public
-router.post('/reset-password', async (req, res) => {
-  try {
-    // Implementation for password reset
-    res.json({ message: 'Password reset endpoint' });
-  } catch (error) {
-    console.error('Reset password error:', error);
-    res.status(500).json({
-      message: 'Server error during password reset',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
-    });
-  }
 });
 
 module.exports = router;

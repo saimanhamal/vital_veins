@@ -1,238 +1,214 @@
-import React, { useCallback, useState } from 'react';
-import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF } from '@react-google-maps/api';
-import LoadingSpinner from '../UI/LoadingSpinner';
-import { MapPin, Phone, Globe, Star } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import toast from 'react-hot-toast';
 
-const HospitalMap = ({ hospitals = [], userLocation, onHospitalSelect, defaultZoom = 12 }) => {
+// Fix for default markers
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+// Custom icons
+const userIcon = L.divIcon({
+  html: `<div style="background-color: #2563EB; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>`,
+  iconSize: [24, 24],
+  className: 'custom-icon'
+});
+
+const hospitalIcon = L.divIcon({
+  html: `<div style="background-color: #E8192C; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">🏥</div>`,
+  iconSize: [28, 28],
+  className: 'custom-icon'
+});
+
+const MapUpdater = ({ userLocation }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (userLocation && map) {
+      const lat = parseFloat(userLocation.latitude || userLocation.lat);
+      const lng = parseFloat(userLocation.longitude || userLocation.lng);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        map.setView([lat, lng], 13);
+      }
+    }
+  }, [userLocation, map]);
+
+  return null;
+};
+
+const HospitalMap = ({
+  hospitals = [],
+  userLocation,
+  onHospitalSelect,
+  defaultZoom = 13
+}) => {
+  const mapRef = useRef(null);
   const [selectedHospital, setSelectedHospital] = useState(null);
-  const [infoWindowOpen, setInfoWindowOpen] = useState(null);
 
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || ''
-  });
+  const hospitalsArray = Array.isArray(hospitals) ? hospitals : [];
 
-  const defaultCenter = userLocation
-    ? { lat: parseFloat(userLocation.latitude), lng: parseFloat(userLocation.longitude) }
-    : { lat: 28.7041, lng: 77.1025 }; // Default to Delhi, India
-
-  const mapOptions = {
-    zoom: defaultZoom,
-    center: defaultCenter,
-    mapTypeControl: true,
-    fullscreenControl: true,
-    streetsViewControl: false
+  // Extract coordinates safely from various formats
+  const getCoordinates = (item) => {
+    if (item.location?.coordinates && Array.isArray(item.location.coordinates)) {
+      // GeoJSON format: [longitude, latitude]
+      return {
+        lat: parseFloat(item.location.coordinates[1]),
+        lng: parseFloat(item.location.coordinates[0])
+      };
+    }
+    if (item.lat && item.lng) {
+      return { lat: parseFloat(item.lat), lng: parseFloat(item.lng) };
+    }
+    if (item.latitude && item.longitude) {
+      return { lat: parseFloat(item.latitude), lng: parseFloat(item.longitude) };
+    }
+    return null;
   };
 
-  const onMarkerClick = (hospital) => {
+  const userCoords = userLocation ? getCoordinates(userLocation) : null;
+  const center = userCoords 
+    ? [userCoords.lat, userCoords.lng]
+    : [27.7172, 85.3240]; // Kathmandu, Nepal
+
+  // Calculate bounds to fit all hospitals and user
+  const FitToBounds = ({ hospitals, userLocation }) => {
+    const map = useMap();
+    
+    useEffect(() => {
+      if (!map) return;
+      
+      const bounds = L.latLngBounds();
+      let hasMarkers = false;
+      
+      if (userLocation) {
+        const userCoords = getCoordinates(userLocation);
+        if (userCoords && !isNaN(userCoords.lat) && !isNaN(userCoords.lng)) {
+          bounds.extend([userCoords.lat, userCoords.lng]);
+          hasMarkers = true;
+        }
+      }
+      
+      hospitalsArray.forEach((hospital) => {
+        const coords = getCoordinates(hospital);
+        if (coords && !isNaN(coords.lat) && !isNaN(coords.lng)) {
+          bounds.extend([coords.lat, coords.lng]);
+          hasMarkers = true;
+        }
+      });
+      
+      if (hasMarkers && bounds.isValid()) {
+        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+      }
+    }, [hospitals, userLocation, map]);
+    
+    return null;
+  };
+
+  const handleHospitalClick = (hospital) => {
     setSelectedHospital(hospital);
-    setInfoWindowOpen(hospital._id);
-  };
-
-  const onHospitalClick = (hospital) => {
     if (onHospitalSelect) {
       onHospitalSelect(hospital);
     }
-    toast.success(`Selected: ${hospital.hospitalName}`);
   };
 
-  if (loadError) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <p className="text-red-600 font-semibold mb-2">Failed to load map</p>
-          <p className="text-gray-600 text-sm">
-            {process.env.REACT_APP_GOOGLE_MAPS_API_KEY 
-              ? 'Error loading Google Maps API' 
-              : 'Google Maps API key is not configured'}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isLoaded) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-50">
-        <LoadingSpinner size="lg" text="Loading map..." />
-      </div>
-    );
-  }
-
   return (
-    <div className="relative w-full h-full">
-      <GoogleMap
-        mapContainerStyle={{ width: '100%', height: '100%' }}
-        options={mapOptions}
-        defaultCenter={defaultCenter}
-        defaultZoom={defaultZoom}
+    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+      <MapContainer
+        center={center}
+        zoom={defaultZoom}
+        style={{ width: '100%', height: '100%' }}
+        ref={mapRef}
       >
-        {/* User location marker */}
-        {userLocation && (
-          <MarkerF
-            position={{
-              lat: parseFloat(userLocation.latitude),
-              lng: parseFloat(userLocation.longitude)
-            }}
-            icon={{
-              path: window.google?.maps?.SymbolPath?.CIRCLE,
-              scale: 8,
-              fillColor: '#2563eb',
-              fillOpacity: 1,
-              strokeColor: '#fff',
-              strokeWeight: 2
-            }}
-            title="Your Location"
-          />
-        )}
+        <TileLayer
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CartoDB</a>'
+          maxZoom={19}
+        />
 
-        {/* Hospital markers */}
-        {hospitals.map((hospital) => (
-          <React.Fragment key={hospital._id}>
-            <MarkerF
-              position={{
-                lat: hospital.location.coordinates[1],
-                lng: hospital.location.coordinates[0]
-              }}
-              onClick={() => onMarkerClick(hospital)}
-              icon={{
-                path: window.google?.maps?.SymbolPath?.CIRCLE,
-                scale: 10,
-                fillColor: '#ef4444',
-                fillOpacity: 0.9,
-                strokeColor: '#fff',
-                strokeWeight: 2
-              }}
-              title={hospital.hospitalName}
-            />
+        <MapUpdater userLocation={userLocation} />
+        <FitToBounds hospitals={hospitalsArray} userLocation={userLocation} />
 
-            {/* Info Window */}
-            {infoWindowOpen === hospital._id && selectedHospital && (
-              <InfoWindowF
-                position={{
-                  lat: hospital.location.coordinates[1],
-                  lng: hospital.location.coordinates[0]
-                }}
-                onCloseClick={() => {
-                  setInfoWindowOpen(null);
-                  setSelectedHospital(null);
-                }}
-              >
-                <div
-                  className="bg-white rounded-lg shadow-lg p-4 max-w-xs cursor-pointer"
-                  onClick={() => onHospitalClick(hospital)}
-                >
-                  <div className="space-y-3">
-                    {/* Hospital Name */}
-                    <div>
-                      <h3 className="font-bold text-gray-900 text-sm">
-                        {hospital.hospitalName}
-                      </h3>
-                      {hospital.distance && (
-                        <p className="text-xs text-blue-600 font-semibold mt-1">
-                          🎯 {hospital.distance} km away
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Rating */}
-                    {hospital.rating && (
-                      <div className="flex items-center space-x-1">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-xs font-medium text-gray-700">
-                          {hospital.rating.average || 'N/A'} ({hospital.rating.count || 0} reviews)
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Address */}
-                    <div className="flex items-start space-x-2">
-                      <MapPin className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                      <p className="text-xs text-gray-600">
-                        {hospital.address?.street}, {hospital.address?.city}
-                      </p>
-                    </div>
-
-                    {/* Contact */}
-                    {hospital.contact?.phone && (
-                      <div className="flex items-center space-x-2">
-                        <Phone className="w-4 h-4 text-green-600 flex-shrink-0" />
-                        <p className="text-xs text-gray-600">{hospital.contact.phone}</p>
-                      </div>
-                    )}
-
-                    {/* Website */}
-                    {hospital.contact?.website && (
-                      <div className="flex items-center space-x-2">
-                        <Globe className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                        <a
-                          href={hospital.contact.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-blue-600 hover:underline"
-                        >
-                          Visit Website
-                        </a>
-                      </div>
-                    )}
-
-                    {/* Specializations */}
-                    {hospital.specialization && hospital.specialization.length > 0 && (
-                      <div className="pt-2 border-t border-gray-200">
-                        <p className="text-xs font-semibold text-gray-700 mb-1">Specializations:</p>
-                        <div className="flex flex-wrap gap-1">
-                          {hospital.specialization.slice(0, 3).map((spec, idx) => (
-                            <span
-                              key={idx}
-                              className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
-                            >
-                              {spec}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Inventory Summary */}
-                    {hospital.inventory && (
-                      <div className="pt-2 border-t border-gray-200">
-                        <p className="text-xs font-semibold text-gray-700 mb-1">Available:</p>
-                        <div className="space-y-1">
-                          {hospital.inventory.blood && hospital.inventory.blood.length > 0 && (
-                            <p className="text-xs text-gray-600">
-                              🩸 {hospital.inventory.blood.length} blood types
-                            </p>
-                          )}
-                          {hospital.inventory.organs && hospital.inventory.organs.length > 0 && (
-                            <p className="text-xs text-gray-600">
-                              🫀 {hospital.inventory.organs.length} organ types
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Action Button */}
-                    <button
-                      onClick={() => onHospitalClick(hospital)}
-                      className="w-full mt-2 bg-blue-600 text-white text-xs py-2 rounded hover:bg-blue-700 transition"
-                    >
-                      Select Hospital
-                    </button>
-                  </div>
+        {/* User Location Marker */}
+        {userLocation && (() => {
+          const coords = getCoordinates(userLocation);
+          return coords && !isNaN(coords.lat) && !isNaN(coords.lng) ? (
+            <Marker position={[coords.lat, coords.lng]} icon={userIcon}>
+              <Popup>
+                <div style={{ fontSize: '12px', fontWeight: 500 }}>
+                  <strong>Your Location</strong>
                 </div>
-              </InfoWindowF>
-            )}
-          </React.Fragment>
-        ))}
-      </GoogleMap>
+              </Popup>
+            </Marker>
+          ) : null;
+        })()}
 
-      {/* Hospitals list overlay (optional, on mobile) */}
-      {hospitals.length === 0 && (
-        <div className="absolute bottom-4 left-4 right-4 bg-white rounded-lg shadow p-4 text-center">
-          <p className="text-gray-600 text-sm">No hospitals found nearby</p>
-        </div>
-      )}
+        {/* Hospital Markers */}
+        {hospitalsArray.map((hospital, idx) => {
+          const coords = getCoordinates(hospital);
+          
+          if (!coords || isNaN(coords.lat) || isNaN(coords.lng)) {
+            console.warn(`Invalid coordinates for hospital ${idx}:`, hospital);
+            return null;
+          }
+
+          const distance = hospital.distance
+            ? typeof hospital.distance === 'number' && hospital.distance > 100
+              ? (hospital.distance / 1000).toFixed(1)
+              : parseFloat(hospital.distance).toFixed(1)
+            : null;
+
+          return (
+            <Marker
+              key={hospital._id || hospital.id || `hospital-${idx}`}
+              position={[coords.lat, coords.lng]}
+              icon={hospitalIcon}
+              eventHandlers={{
+                click: () => handleHospitalClick(hospital),
+              }}
+            >
+              <Popup>
+                <div style={{ width: '220px', fontSize: '13px' }}>
+                  <div style={{ fontWeight: 700, marginBottom: '8px', color: '#1A1A1A' }}>
+                    {hospital.hospitalName || 'Hospital'}
+                  </div>
+                  
+                  {distance && (
+                    <div style={{ color: '#E8192C', fontWeight: 600, marginBottom: '6px' }}>
+                      📍 {distance} km away
+                    </div>
+                  )}
+                  
+                  {hospital.address && (
+                    <div style={{ color: '#6B7280', fontSize: '12px', marginBottom: '6px' }}>
+                      {[hospital.address.street, hospital.address.city, hospital.address.state]
+                        .filter(Boolean)
+                        .join(', ')}
+                    </div>
+                  )}
+                  
+                  {hospital.contact?.phone && (
+                    <div style={{ color: '#374151', fontSize: '12px', marginBottom: '4px' }}>
+                      📞 {hospital.contact.phone}
+                    </div>
+                  )}
+                  
+                  {hospital.specialization && hospital.specialization.length > 0 && (
+                    <div style={{ fontSize: '11px', color: '#6366F1', marginTop: '6px' }}>
+                      {hospital.specialization.slice(0, 2).join(', ')}
+                      {hospital.specialization.length > 2 && ` +${hospital.specialization.length - 2}`}
+                    </div>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
+      </MapContainer>
     </div>
   );
 };

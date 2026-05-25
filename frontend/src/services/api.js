@@ -128,6 +128,13 @@ export const adminAPI = {
   resolveTicket: (id, data) => api.put(`/api/admin/tickets/${id}/resolve`, data),
   sendBroadcast: (data) => api.post('/api/admin/broadcast', data),
   updateDonorStatus: (id, data) => api.put(`/api/admin/donors/${id}/status`, data),
+  // Reward endpoints
+  getRewards: (params) => api.get('/api/admin/rewards', { params }),
+  createReward: (data) => api.post('/api/admin/rewards', data),
+  updateReward: (id, data) => api.put(`/api/admin/rewards/${id}`, data),
+  deleteReward: (id) => api.delete(`/api/admin/rewards/${id}`),
+  fulfillRedemption: (rewardId, redemptionIndex, data) => api.put(`/api/admin/rewards/${rewardId}/redemption/${redemptionIndex}`, data),
+  getRewardsDashboard: () => api.get('/api/admin/rewards/dashboard'),
 };
 
 export const hospitalAPI = {
@@ -160,6 +167,10 @@ export const donorAPI = {
   withdrawTicketResponse: (ticketId, responseId) => api.delete(`/api/donor/tickets/${ticketId}/response/${responseId}`),
   getDonationHistory: (params) => api.get('/api/donor/donation-history', { params }),
   updatePreferences: (data) => api.put('/api/donor/preferences', data),
+  // Reward endpoints
+  getRewards: (params) => api.get('/api/donor/rewards', { params }),
+  getRewardHistory: (params) => api.get('/api/donor/rewards/history', { params }),
+  redeemReward: (rewardId, data) => api.post(`/api/donor/rewards/${rewardId}/redeem`, data),
 };
 
 export const ticketsAPI = {

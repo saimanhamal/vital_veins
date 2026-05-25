@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 
 // Context
 import { useAuth } from './contexts/AuthContext';
@@ -14,6 +14,7 @@ import LoadingSpinner from './components/UI/LoadingSpinner';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
+import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import HospitalDashboard from './pages/Hospital/HospitalDashboard';
 import DonorDashboard from './pages/Donor/DonorDashboard';
@@ -26,6 +27,7 @@ import AdminDonors from './pages/Admin/AdminDonors';
 import AdminTickets from './pages/Admin/AdminTickets';
 import AdminAnalytics from './pages/Admin/AdminAnalytics';
 import AdminAppointments from './pages/Admin/AdminAppointments';
+import AdminRewards from './pages/Admin/AdminRewards';
 
 // Hospital Pages
 import HospitalInventory from './pages/Hospital/HospitalInventory';
@@ -38,12 +40,10 @@ import DonorHospitals from './pages/Donor/DonorHospitals';
 import DonorAppointments from './pages/Donor/DonorAppointments';
 import DonorTickets from './pages/Donor/DonorTickets';
 import DonorHistory from './pages/Donor/DonorHistory';
+import DonorRewards from './pages/Donor/DonorRewards';
 
 function App() {
   const { user, loading, isAuthenticated } = useAuth();
-
-  // Debug logging
-  console.log('App Debug:', { user, loading, isAuthenticated });
 
   if (loading) {
     return (
@@ -60,17 +60,30 @@ function App() {
     <AnimatePresence mode="wait">
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route 
-          path="/login" 
-          element={user ? <Navigate to={`/${user.role}/dashboard`} replace /> : <LoginPage />} 
-        />
-        <Route 
-          path="/register" 
-          element={user ? <Navigate to={`/${user.role}/dashboard`} replace /> : <RegisterPage />} 
+        {/* FIX: Redirect logged-in users away from landing page to their dashboard */}
+        <Route
+          path="/"
+          element={
+            isAuthenticated && user
+              ? <Navigate to={`/${user.role}/dashboard`} replace />
+              : <LandingPage />
+          }
         />
 
-        {/* Protected Routes */}
+        {/* FIX: Redirect logged-in users away from login/register */}
+        <Route
+          path="/login"
+          element={isAuthenticated && user ? <Navigate to={`/${user.role}/dashboard`} replace /> : <LoginPage />}
+        />
+        <Route
+          path="/register"
+          element={isAuthenticated && user ? <Navigate to={`/${user.role}/dashboard`} replace /> : <RegisterPage />}
+        />
+
+        {/* FIX: Added missing forgot-password route */}
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+        {/* Admin Protected Routes */}
         <Route path="/admin/*" element={
           <ProtectedRoute allowedRoles={['admin']}>
             <Layout>
@@ -81,6 +94,7 @@ function App() {
                 <Route path="tickets" element={<AdminTickets />} />
                 <Route path="appointments" element={<AdminAppointments />} />
                 <Route path="analytics" element={<AdminAnalytics />} />
+                <Route path="rewards" element={<AdminRewards />} />
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="" element={<Navigate to="dashboard" replace />} />
                 <Route path="*" element={<Navigate to="dashboard" replace />} />
@@ -89,6 +103,7 @@ function App() {
           </ProtectedRoute>
         } />
 
+        {/* Hospital Protected Routes */}
         <Route path="/hospital/*" element={
           <ProtectedRoute allowedRoles={['hospital']}>
             <Layout>
@@ -106,6 +121,7 @@ function App() {
           </ProtectedRoute>
         } />
 
+        {/* Donor Protected Routes */}
         <Route path="/donor/*" element={
           <ProtectedRoute allowedRoles={['donor']}>
             <Layout>
@@ -115,6 +131,7 @@ function App() {
                 <Route path="appointments" element={<DonorAppointments />} />
                 <Route path="tickets" element={<DonorTickets />} />
                 <Route path="history" element={<DonorHistory />} />
+                <Route path="rewards" element={<DonorRewards />} />
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="" element={<Navigate to="dashboard" replace />} />
                 <Route path="*" element={<Navigate to="dashboard" replace />} />
@@ -123,19 +140,17 @@ function App() {
           </ProtectedRoute>
         } />
 
-        {/* Redirect based on user role */}
-        <Route 
-          path="/dashboard" 
+        {/* Universal dashboard redirect */}
+        <Route
+          path="/dashboard"
           element={
-            user ? (
-              <Navigate to={`/${user.role}/dashboard`} replace />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          } 
+            user
+              ? <Navigate to={`/${user.role}/dashboard`} replace />
+              : <Navigate to="/login" replace />
+          }
         />
 
-        {/* 404 Page */}
+        {/* 404 */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AnimatePresence>

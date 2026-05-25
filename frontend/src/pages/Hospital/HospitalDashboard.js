@@ -8,9 +8,7 @@ import {
   Ticket, 
   Users, 
   AlertTriangle,
-  TrendingUp,
   Package,
-  Clock,
   User
 } from 'lucide-react';
 import { hospitalAPI } from '../../services/api';
@@ -24,31 +22,22 @@ const HospitalDashboard = () => {
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch dashboard data
   const { data: dashboardData, isLoading, error } = useQuery(
     'hospital-dashboard',
     () => hospitalAPI.getDashboard().then(res => res.data),
-    {
-      refetchInterval: 30000, // Refetch every 30 seconds
-    }
+    { refetchInterval: 30000 }
   );
 
-  // Fetch recent appointments
   const { data: appointments } = useQuery(
     'hospital-appointments',
     () => hospitalAPI.getAppointments({ limit: 5 }).then(res => res.data),
-    {
-      refetchInterval: 30000,
-    }
+    { refetchInterval: 30000 }
   );
 
-  // Fetch recent tickets
   const { data: tickets } = useQuery(
     'hospital-tickets',
     () => hospitalAPI.getTickets({ limit: 5 }).then(res => res.data),
-    {
-      refetchInterval: 30000,
-    }
+    { refetchInterval: 30000 }
   );
 
   if (isLoading) {
@@ -71,10 +60,16 @@ const HospitalDashboard = () => {
 
   const { statistics } = dashboardData || {};
 
-  const handleStatClick = (statTitle) => {
-    if (statTitle === 'Total Appointments') {
-      navigate('/hospital/appointments');
-    }
+  const cardHover = {
+    whileHover: { scale: 1.04, y: -4, boxShadow: '0 12px 32px rgba(0,0,0,0.12)' },
+    whileTap: { scale: 0.97 },
+    transition: { type: 'spring', stiffness: 300, damping: 20 }
+  };
+
+  const actionHover = {
+    whileHover: { scale: 1.03, y: -2 },
+    whileTap: { scale: 0.97 },
+    transition: { type: 'spring', stiffness: 300, damping: 20 }
   };
 
   const statCards = [
@@ -84,7 +79,8 @@ const HospitalDashboard = () => {
       icon: Heart,
       color: 'red',
       change: '+5%',
-      changeType: 'positive'
+      changeType: 'positive',
+      onClick: () => navigate('/hospital/inventory')
     },
     {
       title: 'Total Appointments',
@@ -93,7 +89,7 @@ const HospitalDashboard = () => {
       color: 'blue',
       change: '+12%',
       changeType: 'positive',
-      onClick: () => handleStatClick('Total Appointments')
+      onClick: () => navigate('/hospital/appointments')
     },
     {
       title: 'Active Tickets',
@@ -110,7 +106,8 @@ const HospitalDashboard = () => {
       icon: Users,
       color: 'green',
       change: '+8%',
-      changeType: 'positive'
+      changeType: 'positive',
+      onClick: () => navigate('/hospital/donors')
     }
   ];
 
@@ -217,7 +214,6 @@ const HospitalDashboard = () => {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -227,19 +223,22 @@ const HospitalDashboard = () => {
         <p className="text-gray-600">Manage your hospital's donation operations and track real-time data.</p>
       </motion.div>
 
-      {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map((stat, index) => (
-          <StatsCard
+          <motion.div
             key={stat.title}
-            {...stat}
-            loading={isLoading}
-            className="delay-100"
-          />
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: index * 0.08 }}
+            {...cardHover}
+            onClick={stat.onClick}
+            className="cursor-pointer"
+          >
+            <StatsCard {...stat} loading={isLoading} />
+          </motion.div>
         ))}
       </div>
 
-      {/* Quick Actions */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -247,8 +246,9 @@ const HospitalDashboard = () => {
         className="card p-6"
       >
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button 
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <motion.button
+            {...actionHover}
             onClick={() => setIsTicketModalOpen(true)}
             className="flex items-center space-x-3 p-4 bg-red-50 hover:bg-red-100 rounded-lg transition-colors duration-200"
           >
@@ -257,9 +257,10 @@ const HospitalDashboard = () => {
               <p className="font-medium text-red-900">Create Emergency Ticket</p>
               <p className="text-sm text-red-700">Request urgent blood or organ</p>
             </div>
-          </button>
-          
-          <button 
+          </motion.button>
+
+          <motion.button
+            {...actionHover}
             onClick={() => navigate('/hospital/inventory')}
             className="flex items-center space-x-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200"
           >
@@ -268,9 +269,10 @@ const HospitalDashboard = () => {
               <p className="font-medium text-blue-900">Manage Inventory</p>
               <p className="text-sm text-blue-700">Update blood and organ stock</p>
             </div>
-          </button>
-          
-          <button 
+          </motion.button>
+
+          <motion.button
+            {...actionHover}
             onClick={() => navigate('/hospital/appointments')}
             className="flex items-center space-x-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors duration-200"
           >
@@ -279,9 +281,10 @@ const HospitalDashboard = () => {
               <p className="font-medium text-green-900">View Appointments</p>
               <p className="text-sm text-green-700">Manage donor appointments</p>
             </div>
-          </button>
-          
-          <button 
+          </motion.button>
+
+          <motion.button
+            {...actionHover}
             onClick={() => navigate('/hospital/profile')}
             className="flex items-center space-x-3 p-4 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors duration-200"
           >
@@ -290,13 +293,11 @@ const HospitalDashboard = () => {
               <p className="font-medium text-indigo-900">View Profile</p>
               <p className="text-sm text-indigo-700">Manage your account settings</p>
             </div>
-          </button>
+          </motion.button>
         </div>
       </motion.div>
 
-      {/* Recent Activity */}
       <div className="grid lg:grid-cols-2 gap-8">
-        {/* Recent Appointments */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -304,20 +305,31 @@ const HospitalDashboard = () => {
           className="card p-6"
         >
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Recent Appointments</h2>
-            <Calendar className="w-6 h-6 text-gray-400" />
+            <h2
+              onClick={() => navigate('/hospital/appointments')}
+              className="text-xl font-semibold text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
+            >
+              Recent Appointments
+            </h2>
+            <motion.div
+              whileHover={{ rotate: 15, scale: 1.2 }}
+              transition={{ type: 'spring', stiffness: 300 }}
+              onClick={() => navigate('/hospital/appointments')}
+              className="cursor-pointer"
+            >
+              <Calendar className="w-6 h-6 text-gray-400" />
+            </motion.div>
           </div>
-          
           <DataTable
             data={appointments?.appointments || []}
             columns={appointmentColumns}
             loading={!appointments}
             pagination={false}
             className="border-0 shadow-none"
+            onRowClick={() => navigate('/hospital/appointments')}
           />
         </motion.div>
 
-        {/* Recent Tickets */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -325,21 +337,32 @@ const HospitalDashboard = () => {
           className="card p-6"
         >
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Recent Tickets</h2>
-            <Ticket className="w-6 h-6 text-gray-400" />
+            <h2
+              onClick={() => navigate('/hospital/tickets')}
+              className="text-xl font-semibold text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
+            >
+              Recent Tickets
+            </h2>
+            <motion.div
+              whileHover={{ rotate: 15, scale: 1.2 }}
+              transition={{ type: 'spring', stiffness: 300 }}
+              onClick={() => navigate('/hospital/tickets')}
+              className="cursor-pointer"
+            >
+              <Ticket className="w-6 h-6 text-gray-400" />
+            </motion.div>
           </div>
-          
           <DataTable
             data={tickets?.tickets || []}
             columns={ticketColumns}
             loading={!tickets}
             pagination={false}
             className="border-0 shadow-none"
+            onRowClick={() => navigate('/hospital/tickets')}
           />
         </motion.div>
       </div>
 
-      {/* Emergency Ticket Modal */}
       <TicketModal
         isOpen={isTicketModalOpen}
         onClose={() => setIsTicketModalOpen(false)}

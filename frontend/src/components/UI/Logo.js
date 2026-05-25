@@ -6,103 +6,77 @@ import { useAuth } from '../../contexts/AuthContext';
 const Logo = ({ size = 'medium', variant = 'full', clickable = true }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  // Size configurations
+
   const sizeConfig = {
-    small: {
-      iconSize: 'w-6 h-6',
-      logoSize: 'w-8 h-8',
-      textSize: 'text-lg',
-      subtextSize: 'text-xs'
-    },
-    medium: {
-      iconSize: 'w-8 h-8',
-      logoSize: 'w-10 h-10',
-      textSize: 'text-xl',
-      subtextSize: 'text-sm'
-    },
-    large: {
-      iconSize: 'w-12 h-12',
-      logoSize: 'w-16 h-16',
-      textSize: 'text-3xl',
-      subtextSize: 'text-base'
-    }
+    small: { logoSize: 32, textSize: 'text-base', subtextSize: 'text-xs' },
+    medium: { logoSize: 40, textSize: 'text-xl', subtextSize: 'text-sm' },
+    large: { logoSize: 56, textSize: 'text-3xl', subtextSize: 'text-base' }
   };
 
   const config = sizeConfig[size] || sizeConfig.medium;
+  const s = config.logoSize;
 
   const handleLogoClick = () => {
-    if (clickable && user) {
-      // Navigate based on user role
-      if (user.role === 'admin') {
-        navigate('/admin/dashboard');
-      } else if (user.role === 'hospital') {
-        navigate('/hospital/dashboard');
-      } else if (user.role === 'donor') {
-        navigate('/donor/dashboard');
-      }
-    } else if (clickable && !user) {
+    if (!clickable) return;
+    if (user) {
+      navigate(`/${user.role}/dashboard`);
+    } else {
       navigate('/');
     }
   };
 
-  // Logo icon - stylized heart with droplets
-  const LogoIcon = () => (
-    <svg
-      viewBox="0 0 100 100"
-      className={`${config.logoSize}`}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Heart with pulse effect */}
-      <g>
-        {/* Main heart shape */}
-        <path
-          d="M50 85C50 85 20 65 20 45C20 35 28 28 36 28C42 28 48 32 50 38C52 32 58 28 64 28C72 28 80 35 80 45C80 65 50 85 50 85Z"
-          fill="url(#heartGradient)"
-          strokeWidth="2"
-          stroke="white"
-        />
-        
-        {/* Blood drop on the side */}
-        <ellipse cx="70" cy="35" rx="6" ry="8" fill="url(#dropletGradient)" />
-        
-        {/* Gradient definitions */}
-        <defs>
-          <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style={{ stopColor: '#ef4444', stopOpacity: 1 }} />
-            <stop offset="100%" style={{ stopColor: '#dc2626', stopOpacity: 1 }} />
-          </linearGradient>
-          <linearGradient id="dropletGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style={{ stopColor: '#fbbf24', stopOpacity: 1 }} />
-            <stop offset="100%" style={{ stopColor: '#f59e0b', stopOpacity: 1 }} />
-          </linearGradient>
-        </defs>
-      </g>
+  // The VitalVeins mark — red circle, white blood drop, ECG pulse line
+  const LogoMark = ({ size: sz }) => (
+    <svg width={sz} height={sz} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+      {/* Red background circle */}
+      <circle cx="32" cy="32" r="32" fill="#E8192C" />
+      {/* Inner white circle */}
+      <circle cx="32" cy="32" r="26" fill="white" />
+      {/* Blood drop shape */}
+      <path
+        d="M32 12 C32 12 16 30 16 40 C16 50 23 57 32 57 C41 57 48 50 48 40 C48 30 32 12 32 12Z"
+        fill="#E8192C"
+      />
+      {/* ECG / pulse line inside drop */}
+      <path
+        d="M20 40 L25 40 L28 30 L32 50 L36 36 L39 40 L44 40"
+        fill="none"
+        stroke="white"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 
   if (variant === 'icon') {
-    return <LogoIcon />;
+    return (
+      <div
+        onClick={handleLogoClick}
+        className={clickable ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}
+      >
+        <LogoMark size={s} />
+      </div>
+    );
   }
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className={`flex items-center space-x-3 ${clickable ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
       onClick={handleLogoClick}
+      className={`flex items-center space-x-2.5 ${clickable ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
     >
-      <div className={`${config.logoSize} bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
-        <LogoIcon />
-      </div>
+      <LogoMark size={s} />
+
       {variant === 'full' && (
         <div>
-          <h1 className={`${config.textSize} font-bold text-gray-900`}>
-            <span className="text-red-600">Vital</span>
-            <span className="text-blue-600">Veins</span>
+          <h1 className={`${config.textSize} font-bold leading-tight`}>
+            <span style={{ color: '#E8192C', fontStyle: 'italic' }}>Vital</span>
+            <span className="text-gray-900" style={{ fontStyle: 'italic' }}>Veins</span>
           </h1>
-          <p className={`${config.subtextSize} text-gray-500 font-medium`}>
-            Smart Donation System
+          <p className={`${config.subtextSize} text-gray-400 font-medium tracking-wide`}>
+            Save Lives · Give Blood
           </p>
         </div>
       )}

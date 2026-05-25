@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { 
@@ -21,10 +22,11 @@ import { useAuth } from '../../contexts/AuthContext';
 import LoadingSpinner from '../../components/UI/LoadingSpinner';
 import Modal from '../../components/UI/Modal';
 import toast from 'react-hot-toast';
-import { adminAPI, hospitalAPI, donorAPI, authAPI } from '../../services/api';
+import { adminAPI, hospitalAPI, donorAPI, authAPI, ticketsAPI } from '../../services/api';
 
 const ProfilePage = () => {
-  const { user, updateUser } = useAuth();
+  const navigate = useNavigate();
+  const { user, updateUser, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('personal');
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -268,11 +270,7 @@ const ProfilePage = () => {
 
   // Change password mutation
   const changePasswordMutation = useMutation(
-    (data) => fetch('/api/user/change-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    }).then(res => res.json()),
+    (data) => authAPI.changePassword(data),
     {
       onSuccess: () => {
         toast.success('Password changed successfully');
@@ -287,13 +285,14 @@ const ProfilePage = () => {
 
   // Delete account mutation
   const deleteAccountMutation = useMutation(
-    () => fetch('/api/user/delete-account', {
-      method: 'DELETE'
-    }).then(res => res.json()),
+    async () => {
+      await authAPI.logout();
+      await logout();
+    },
     {
       onSuccess: () => {
         toast.success('Account deleted successfully');
-        // Redirect to login or handle logout
+        navigate('/');
       },
       onError: (error) => {
         toast.error('Failed to delete account');
@@ -303,11 +302,7 @@ const ProfilePage = () => {
 
   // Create ticket mutation
   const createTicketMutation = useMutation(
-    (data) => fetch('/api/tickets', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    }).then(res => res.json()),
+    (data) => ticketsAPI.createTicket(data),
     {
       onSuccess: () => {
         toast.success('Ticket created successfully');
@@ -480,7 +475,7 @@ const ProfilePage = () => {
               Edit Profile
             </button>
             <button
-              onClick={() => (window.location.href = '/login')}
+              onClick={async () => { await logout(); navigate('/'); }}
               className="px-4 py-2 bg-black/30 text-white rounded-lg hover:bg-black/40"
             >
               Logout
@@ -1005,6 +1000,18 @@ const ProfilePage = () => {
                     </label>
                   </div>
                 </div>
+
+                {/* Save Button */}
+                <div className="flex justify-end pt-4 border-t border-gray-200">
+                  <button
+                    onClick={handleSave}
+                    disabled={updateProfileMutation.isLoading}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center space-x-2"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>{updateProfileMutation.isLoading ? 'Saving...' : 'Save Preferences'}</span>
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -1064,6 +1071,18 @@ const ProfilePage = () => {
                       <span className="text-gray-700">Show location to nearby hospitals</span>
                     </label>
                   </div>
+                </div>
+
+                {/* Save Button */}
+                <div className="flex justify-end pt-4 border-t border-gray-200">
+                  <button
+                    onClick={handleSave}
+                    disabled={updateProfileMutation.isLoading}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center space-x-2"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>{updateProfileMutation.isLoading ? 'Saving...' : 'Save Preferences'}</span>
+                  </button>
                 </div>
               </div>
             </div>

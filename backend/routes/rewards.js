@@ -77,12 +77,52 @@ router.post('/', authenticate, authorize('admin'), async (req, res) => {
 });
 
 /**
- * @route   GET /api/donor/rewards
- * @desc    Get available rewards for donor
- * @access  Private (Donor only)
+ * @route   GET /api/donor/rewards  OR  GET /api/admin/rewards
+ * @desc    Get available rewards for donor OR all rewards for admin
+ * @access  Private (Donor or Admin)
  */
-router.get('/donor/available', authenticate, authorize('donor'), validatePagination, async (req, res) => {
+router.get('/', authenticate, authorize('donor', 'admin'), validatePagination, async (req, res) => {
   try {
+    // Admin gets all rewards with stats
+    if (req.user.role === 'admin') {
+      const { page = 1, limit = 20, category, rewardType, isActive } = req.query;
+
+      const filter = {};
+      if (category) filter.category = category;
+      if (rewardType) filter.rewardType = rewardType;
+      if (isActive !== undefined) filter.isActive = isActive === 'true';
+
+      const rewards = await Reward.find(filter)
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .sort({ createdAt: -1 })
+        .select('_id title rewardType pointsCost stock isActive redemptionHistory createdAt');
+
+      const total = await Reward.countDocuments(filter);
+
+      const enrichedRewards = rewards.map(reward => ({
+        _id: reward._id,
+        title: reward.title,
+        rewardType: reward.rewardType,
+        pointsCost: reward.pointsCost,
+        stock: reward.stock,
+        isActive: reward.isActive,
+        redemptions: reward.redemptionHistory.length,
+        createdAt: reward.createdAt
+      }));
+
+      return res.json({
+        rewards: enrichedRewards,
+        pagination: {
+          total,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          pages: Math.ceil(total / limit)
+        }
+      });
+    }
+
+    // Donor gets available rewards personalized for them
     const { page = 1, limit = 20, category, minPoints, maxPoints, sortBy = '-pointsCost' } = req.query;
 
     const donor = await Donor.findOne({ user: req.user._id });
@@ -257,7 +297,7 @@ router.post('/:rewardId/redeem', authenticate, authorize('donor'), validateObjec
  * @desc    Get donor's reward redemption history
  * @access  Private (Donor only)
  */
-router.get('/donor/history', authenticate, authorize('donor'), async (req, res) => {
+router.get('/history', authenticate, authorize('donor'), async (req, res) => {
   try {
     const donor = await Donor.findOne({ user: req.user._id });
     if (!donor) {
@@ -319,55 +359,10 @@ router.get('/donor/history', authenticate, authorize('donor'), async (req, res) 
 });
 
 /**
- * @route   GET /api/admin/rewards
- * @desc    Get all rewards (admin management)
+ * @route   GET /api/admin/rewards (handled by consolidated route above)
+ * @desc    REMOVED - Consolidated with main GET / route
  * @access  Private (Admin only)
  */
-router.get('/admin', authenticate, authorize('admin'), validatePagination, async (req, res) => {
-  try {
-    const { page = 1, limit = 20, category, rewardType, isActive } = req.query;
-
-    const filter = {};
-    if (category) filter.category = category;
-    if (rewardType) filter.rewardType = rewardType;
-    if (isActive !== undefined) filter.isActive = isActive === 'true';
-
-    const rewards = await Reward.find(filter)
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .sort({ createdAt: -1 })
-      .select('_id title rewardType pointsCost stock isActive redemptionHistory createdAt');
-
-    const total = await Reward.countDocuments(filter);
-
-    const enrichedRewards = rewards.map(reward => ({
-      _id: reward._id,
-      title: reward.title,
-      rewardType: reward.rewardType,
-      pointsCost: reward.pointsCost,
-      stock: reward.stock,
-      isActive: reward.isActive,
-      redemptions: reward.redemptionHistory.length,
-      createdAt: reward.createdAt
-    }));
-
-    res.json({
-      rewards: enrichedRewards,
-      pagination: {
-        total,
-        page: parseInt(page),
-        limit: parseInt(limit),
-        pages: Math.ceil(total / limit)
-      }
-    });
-  } catch (error) {
-    console.error('Error fetching rewards:', error);
-    res.status(500).json({
-      message: 'Server error fetching rewards',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
-});
 
 /**
  * @route   PUT /api/admin/rewards/:rewardId

@@ -102,5 +102,63 @@ logs
 *.sqlite
 *.db
 
+# ============================================================================
+# AI TOOLS & COPILOT - DO NOT COMMIT
+# ============================================================================
+
+# Cursor AI
+.cursor/
+.cursor_config/
+.cursorignore
+.cursor_instructions
+.cursor_context/
+cursor_rules/
+.ai_context/
+ai_context/
+.llm/
+llm/
+.llm_context/
+*.llm_context
+
+# GitHub Copilot & VS Code AI Extensions
+.github/copilot*
+.copilot_instructions
+.copilot.md
+.copilot_context/
+copilot_context/
+.vscode/copilot/
+.vscode/installed_extensions.json
+
+# AI Generated Files & Context Markers
+*_generated.js
+*_ai_generated.js
+*_generated.ts
+*_ai_generated.ts
+AI_HELP.md
+AI_CONTEXT.md
+COPILOT_SUMMARY.md
+COPILOT_CHAT.md
+CURSOR_CHAT.md
+.ai_generated/
+.ai_history/
+
+# AI Context & Memory Files
+.context/
+context/
+*.context
+.ai_memory/
+ai_memory/
+.llm_context/
+llm_context/
+
+# LLM & Language Model Tool Artifacts
+.claude/
+.chatgpt/
+.gpt/
+.deepseek/
+.ollama/
+*.llm
+.llm_cache/
+
 *.md
 !README.md

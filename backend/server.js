@@ -11,7 +11,18 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: [
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+      "http://localhost:3001",
+      "http://127.0.0.1:3001",
+      "http://localhost:3002",
+      "http://127.0.0.1:3002",
+      "http://localhost:3003",
+      "http://127.0.0.1:3003",
+      "http://localhost:3004",
+      "http://127.0.0.1:3004"
+    ],
     methods: ["GET", "POST"]
   }
 });
@@ -32,7 +43,14 @@ app.use(cors({
   origin: [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://localhost:3001"
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+    "http://localhost:3002",
+    "http://127.0.0.1:3002",
+    "http://localhost:3003",
+    "http://127.0.0.1:3003",
+    "http://localhost:3004",
+    "http://127.0.0.1:3004"
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -92,6 +110,7 @@ app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/search', require('./routes/search'));
 
 // NEW FEATURE ROUTES
+app.use('/api/location', require('./routes/location'));
 app.use('/api/badges', require('./routes/badges'));
 app.use('/api/admin/fraud', require('./routes/fraud'));
 app.use('/api/events', require('./routes/events'));
@@ -131,20 +150,50 @@ app.use('*', (req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = parseInt(process.env.PORT) || 5000;
+
+// Function to find an available port
+const findAvailablePort = (startPort) => {
+  return new Promise((resolve, reject) => {
+    const testServer = require('http').createServer();
+    const portToTry = parseInt(startPort);
+    
+    testServer.listen(portToTry, () => {
+      testServer.close(() => {
+        resolve(portToTry);
+      });
+    });
+    
+    testServer.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        resolve(findAvailablePort(portToTry + 1));
+      } else {
+        reject(err);
+      }
+    });
+  });
+};
 
 // Only start server if not in test mode
 if (process.env.NODE_ENV !== 'test') {
-  const httpServer = server.listen(PORT, () => {
-    console.log(`🚀 LifeLink server running on port ${PORT}`);
-    console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
-  });
+  findAvailablePort(PORT).then((availablePort) => {
+    const httpServer = server.listen(availablePort, () => {
+      console.log(`🚀 LifeLink server running on port ${availablePort}`);
+      console.log(`📊 Health check: http://localhost:${availablePort}/api/health`);
+      if (availablePort !== PORT) {
+        console.log(`ℹ️  Port ${PORT} was in use, switched to ${availablePort}`);
+      }
+    });
 
-  httpServer.on("error", (err) => {
-    if (err.code === "EADDRINUSE") {
-      console.error(`❌ Port ${PORT} is already in use. Please free the port or use a different one.`);
-      process.exit(1);
-    }
+    httpServer.on("error", (err) => {
+      if (err.code === "EADDRINUSE") {
+        console.error(`❌ Unable to find available port starting from ${PORT}`);
+        process.exit(1);
+      }
+    });
+  }).catch((err) => {
+    console.error('❌ Error starting server:', err);
+    process.exit(1);
   });
 }
 
