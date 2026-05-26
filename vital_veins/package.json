@@ -1,8 +1,10 @@
 {
   "name": "vitalveins-donation-system",
+  "homepage": "https://saimanhamal.github.io/<vital_veins>",
   "version": "1.0.0",
   "description": "Smart Blood & Organ Donation Management System",
   "main": "server.js",
+
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd backend && npm run dev",
@@ -10,7 +12,9 @@
     "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "seed": "cd backend && node scripts/seedData.js",
     "test-apis": "node test-all-apis.js",
-    "test-apis-ps": "powershell -ExecutionPolicy Bypass -File test-all-apis.ps1"
+    "test-apis-ps": "powershell -ExecutionPolicy Bypass -File test-all-apis.ps1",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "keywords": [
     "donation",
