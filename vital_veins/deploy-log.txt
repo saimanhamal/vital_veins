@@ -1,0 +1,232 @@
+
+> vitalveins-donation-system@1.0.0 predeploy
+> npm run build
+
+
+> vitalveins-donation-system@1.0.0 build
+> cd frontend && npm run build
+
+
+> vitalveins-frontend@1.0.0 build
+> node scripts/build.js
+
+Creating an optimized production build...
+Compiled with warnings.
+
+[eslint] 
+src\components\Hospital\InventoryManagement.js
+  Line 13:3:   'Clock' is defined but never used                  no-unused-vars
+  Line 14:3:   'TrendingUp' is defined but never used             no-unused-vars
+  Line 15:3:   'TrendingDown' is defined but never used           no-unused-vars
+  Line 16:3:   'Filter' is defined but never used                 no-unused-vars
+  Line 18:3:   'Download' is defined but never used               no-unused-vars
+  Line 19:3:   'Upload' is defined but never used                 no-unused-vars
+  Line 21:3:   'Eye' is defined but never used                    no-unused-vars
+  Line 22:3:   'EyeOff' is defined but never used                 no-unused-vars
+  Line 23:3:   'Calendar' is defined but never used               no-unused-vars
+  Line 24:3:   'Hash' is defined but never used                   no-unused-vars
+  Line 25:3:   'Activity' is defined but never used               no-unused-vars
+  Line 26:3:   'Zap' is defined but never used                    no-unused-vars
+  Line 27:3:   'Target' is defined but never used                 no-unused-vars
+  Line 28:3:   'BarChart3' is defined but never used              no-unused-vars
+  Line 29:3:   'PieChart' is defined but never used               no-unused-vars
+  Line 36:10:  'formatDateTime' is defined but never used         no-unused-vars
+  Line 344:9:  'expiredCount' is assigned a value but never used  no-unused-vars
+
+src\components\Hospital\TicketModal.js
+  Line 5:3:    'Clock' is defined but never used                               no-unused-vars
+  Line 8:3:    'Mail' is defined but never used                                no-unused-vars
+  Line 9:3:    'MapPin' is defined but never used                              no-unused-vars
+  Line 10:3:   'Calendar' is defined but never used                            no-unused-vars
+  Line 14:3:   'Zap' is defined but never used                                 no-unused-vars
+  Line 15:3:   'Shield' is defined but never used                              no-unused-vars
+  Line 16:3:   'CheckCircle' is defined but never used                         no-unused-vars
+  Line 17:3:   'XCircle' is defined but never used                             no-unused-vars
+  Line 20:3:   'Send' is defined but never used                                no-unused-vars
+  Line 21:3:   'Plus' is defined but never used                                no-unused-vars
+  Line 22:3:   'Minus' is defined but never used                               no-unused-vars
+  Line 23:3:   'Target' is defined but never used                              no-unused-vars
+  Line 24:3:   'Activity' is defined but never used                            no-unused-vars
+  Line 27:10:  'hospitalAPI' is defined but never used                         no-unused-vars
+  Line 149:9:  'handleCompatibilityChange' is assigned a value but never used  no-unused-vars
+  Line 171:9:  'bloodCompatibilityOptions' is assigned a value but never used  no-unused-vars
+  Line 175:9:  'organCompatibilityOptions' is assigned a value but never used  no-unused-vars
+
+src\components\Layout\Layout.js
+  Line 9:11:  'user' is assigned a value but never used  no-unused-vars
+
+src\components\Layout\Sidebar.js
+  Line 79:9:  'getRoleDisplayName' is assigned a value but never used  no-unused-vars
+
+src\components\Maps\HospitalMap.js
+  Line 5:8:    'toast' is defined but never used                      no-unused-vars
+  Line 51:10:  'selectedHospital' is assigned a value but never used  no-unused-vars
+
+src\components\Maps\LocationPicker.js
+  Line 1:27:  'useEffect' is defined but never used  no-unused-vars
+  Line 4:48:  'MapPin' is defined but never used     no-unused-vars
+
+src\components\UI\DataTable.js
+  Line 3:53:  'MoreVertical' is defined but never used  no-unused-vars
+
+src\components\UI\StatsCard.js
+  Line 2:10:  'motion' is defined but never used  no-unused-vars
+
+src\contexts\AuthContext.js
+  Line 100:6:  React Hook useEffect has a missing dependency: 'loadUser'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\contexts\SocketContext.js
+  Line 121:6:  React Hook useEffect has a missing dependency: 'socket'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\pages\Admin\AdminAnalytics.js
+  Line 11:3:  'BarChart3' is defined but never used   no-unused-vars
+  Line 12:3:  'TrendingUp' is defined but never used  no-unused-vars
+  Line 15:3:  'Heart' is defined but never used       no-unused-vars
+  Line 16:3:  'Calendar' is defined but never used    no-unused-vars
+  Line 22:3:  'Filter' is defined but never used      no-unused-vars
+  Line 27:3:  'LineChart' is defined but never used   no-unused-vars
+  Line 28:3:  'Line' is defined but never used        no-unused-vars
+  Line 33:3:  'Legend' is defined but never used      no-unused-vars
+  Line 39:3:  'Area' is defined but never used        no-unused-vars
+  Line 40:3:  'AreaChart' is defined but never used   no-unused-vars
+
+src\pages\Admin\AdminAppointments.js
+  Line 1:17:   'useEffect' is defined but never used            no-unused-vars
+  Line 8:3:    'MapPin' is defined but never used               no-unused-vars
+  Line 17:3:   'Filter' is defined but never used               no-unused-vars
+  Line 25:10:  'formatDateTime' is defined but never used       no-unused-vars
+  Line 31:10:  'loading' is assigned a value but never used     no-unused-vars
+  Line 31:19:  'setLoading' is assigned a value but never used  no-unused-vars
+
+src\pages\Admin\AdminDashboard.js
+  Line 16:10:  'formatDateTime' is defined but never used  no-unused-vars
+
+src\pages\Admin\AdminDonors.js
+  Line 16:3:   'User' is defined but never used              no-unused-vars
+  Line 20:8:   'LoadingSpinner' is defined but never used    no-unused-vars
+  Line 24:26:  'getStatusClasses' is defined but never used  no-unused-vars
+
+src\pages\Admin\AdminRewards.js
+  Line 11:3:  'Filter' is defined but never used      no-unused-vars
+  Line 22:3:  'Download' is defined but never used    no-unused-vars
+  Line 23:3:  'TrendingUp' is defined but never used  no-unused-vars
+
+src\pages\Admin\AdminTickets.js
+  Line 9:3:   'X' is defined but never used                              no-unused-vars
+  Line 11:3:  'MessageCircle' is defined but never used                  no-unused-vars
+  Line 13:3:  'Heart' is defined but never used                          no-unused-vars
+  Line 15:3:  'Filter' is defined but never used                         no-unused-vars
+  Line 16:3:  'Send' is defined but never used                           no-unused-vars
+  Line 21:8:  'LoadingSpinner' is defined but never used                 no-unused-vars
+  Line 94:9:  'assignTicketMutation' is assigned a value but never used  no-unused-vars
+
+src\pages\Auth\RegisterPage.js
+  Line 6:21:  'CheckCircle' is defined but never used  no-unused-vars
+  Line 6:42:  'ShieldCheck' is defined but never used  no-unused-vars
+
+src\pages\Auth\RegistrationSuccessPage.js
+  Line 4:31:  'Building2' is defined but never used  no-unused-vars
+
+src\pages\Donor\DonorAppointments.js
+  Line 7:3:    'MapPin' is defined but never used                                                                                    no-unused-vars
+  Line 9:3:    'Hospital' is defined but never used                                                                                  no-unused-vars
+  Line 10:3:   'User' is defined but never used                                                                                      no-unused-vars
+  Line 28:3:   'AlertTriangle' is defined but never used                                                                             no-unused-vars
+  Line 39:11:  'user' is assigned a value but never used                                                                             no-unused-vars
+  Line 62:6:   React Hook useEffect has a missing dependency: 'fetchAppointments'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\pages\Donor\DonorDashboard.js
+  Line 15:3:  'Coins' is defined but never used  no-unused-vars
+
+src\pages\Donor\DonorHistory.js
+  Line 1:27:   'useEffect' is defined but never used                 no-unused-vars
+  Line 11:3:   'TrendingUp' is defined but never used                no-unused-vars
+  Line 16:3:   'Filter' is defined but never used                    no-unused-vars
+  Line 18:3:   'Download' is defined but never used                  no-unused-vars
+  Line 25:3:   'BarChart3' is defined but never used                 no-unused-vars
+  Line 26:3:   'PieChart' is defined but never used                  no-unused-vars
+  Line 29:8:   'LoadingSpinner' is defined but never used            no-unused-vars
+  Line 31:10:  'formatDateTime' is defined but never used            no-unused-vars
+  Line 32:8:   'toast' is defined but never used                     no-unused-vars
+  Line 42:10:  'showDetailModal' is assigned a value but never used  no-unused-vars
+  Line 45:30:  'isLoading' is assigned a value but never used        no-unused-vars
+
+src\pages\Donor\DonorHospitals.js
+  Line 6:3:     'Filter' is defined but never used                                                                                 no-unused-vars
+  Line 17:3:    'Info' is defined but never used                                                                                   no-unused-vars
+  Line 20:3:    'BookOpen' is defined but never used                                                                               no-unused-vars
+  Line 21:3:    'Users' is defined but never used                                                                                  no-unused-vars
+  Line 22:3:    'Building' is defined but never used                                                                               no-unused-vars
+  Line 104:6:   React Hook useEffect has a missing dependency: 'fetchHospitals'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 920:28:  Comments inside children section of tag should be placed inside braces                                             react/jsx-no-comment-textnodes
+
+src\pages\Donor\DonorRewards.js
+  Line 1:27:  'useEffect' is defined but never used   no-unused-vars
+  Line 6:3:   'Star' is defined but never used        no-unused-vars
+  Line 7:3:   'Heart' is defined but never used       no-unused-vars
+  Line 12:3:  'Filter' is defined but never used      no-unused-vars
+  Line 18:3:  'TrendingUp' is defined but never used  no-unused-vars
+  Line 21:3:  'Download' is defined but never used    no-unused-vars
+  Line 26:8:  'StatsCard' is defined but never used   no-unused-vars
+
+src\pages\Donor\DonorTickets.js
+  Line 51:6:  React Hook useEffect has a missing dependency: 'fetchTickets'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\pages\Hospital\HospitalAppointments.js
+  Line 9:3:   'Filter' is defined but never used          no-unused-vars
+  Line 11:3:  'Plus' is defined but never used            no-unused-vars
+  Line 15:3:  'Edit' is defined but never used            no-unused-vars
+  Line 24:8:  'LoadingSpinner' is defined but never used  no-unused-vars
+
+src\pages\Hospital\HospitalDonors.js
+  Line 17:3:  'Clock' is defined but never used           no-unused-vars
+  Line 18:3:  'Star' is defined but never used            no-unused-vars
+  Line 19:3:  'TrendingUp' is defined but never used      no-unused-vars
+  Line 20:3:  'Activity' is defined but never used        no-unused-vars
+  Line 21:3:  'MapPin' is defined but never used          no-unused-vars
+  Line 26:8:  'LoadingSpinner' is defined but never used  no-unused-vars
+
+src\pages\Hospital\HospitalTickets.js
+  Line 2:10:  'motion' is defined but never used          no-unused-vars
+  Line 4:10:  'Ticket' is defined but never used          no-unused-vars
+  Line 8:8:   'LoadingSpinner' is defined but never used  no-unused-vars
+
+src\pages\LandingPage.js
+  Line 8:16:  'Clock' is defined but never used            no-unused-vars
+  Line 23:9:  'mapRef' is assigned a value but never used  no-unused-vars
+
+src\pages\Profile\ProfilePage.js
+  Line 141:17:  'profileData' is assigned a value but never used  no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+File sizes after gzip:
+
+  646.26 kB  build\static\js\main.e3c4c21d.js
+  43.24 kB   build\static\js\455.4ad5c15a.chunk.js
+  17.11 kB   build\static\css\main.9b439647.css
+  8.7 kB     build\static\js\977.d505b18c.chunk.js
+
+The bundle size is significantly larger than recommended.
+Consider reducing it with code splitting: https://goo.gl/9VhYWB
+You can also analyze the project dependencies: https://goo.gl/LeUzfb
+
+The project was built assuming it is hosted at /.
+You can control this with the homepage field in your package.json.
+
+The build folder is ready to be deployed.
+You may serve it with a static server:
+
+  npm install -g serve
+  serve -s build
+
+Find out more about deployment here:
+
+  https://cra.link/deployment
+
+
+> vitalveins-donation-system@1.0.0 deploy
+> gh-pages -d frontend/build
+
+Published
