@@ -13,7 +13,10 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (user && token) {
       // Initialize socket connection
-      const newSocket = io(process.env.REACT_APP_API_URL || 'https://vital-veins.onrender.com', {
+      const socketUrl = process.env.REACT_APP_API_URL
+        ? process.env.REACT_APP_API_URL.replace(/\/+$/, '')
+        : window.location.origin;
+      const newSocket = io(socketUrl, {
         auth: {
           token: token,
         },

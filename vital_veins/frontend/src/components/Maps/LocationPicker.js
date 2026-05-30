@@ -13,7 +13,9 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_BASE = process.env.REACT_APP_API_URL
+  ? `${process.env.REACT_APP_API_URL.replace(/\/+$/, '')}/api`
+  : `${window.location.origin}/api`;
 const DEFAULT_MAP_CENTER = [20, 0]; // World center, neutral starting point
 
 const CustomMarker = ({ position, onMapClick }) => {
