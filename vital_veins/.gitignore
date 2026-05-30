@@ -12,11 +12,7 @@ yarn-error.log*
 .env.production.local
 .env.test
 
-# Build outputs
-build/
-dist/
-*.tgz
-*.tar.gz
+
 
 # Runtime data
 pids
