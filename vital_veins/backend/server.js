@@ -150,7 +150,7 @@ app.use('*', (req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-const PORT = parseInt(process.env.PORT) || 5000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
 
 // Function to find an available port
 const findAvailablePort = (startPort) => {
