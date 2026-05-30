@@ -7,6 +7,8 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 require('dotenv').config();
 
+const DATABASE_URL = process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins';
+
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
@@ -71,8 +73,8 @@ app.use(express.urlencoded({ extended: true }));
 // Database connection - only auto-connect when not running tests. Tests
 // create their own in-memory connections to avoid conflicts.
 if (process.env.NODE_ENV !== 'test') {
-  mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('✅ MongoDB connected successfully'))
+  mongoose.connect(DATABASE_URL)
+    .then(() => console.log(`✅ MongoDB connected successfully to ${DATABASE_URL}`))
     .catch(err => console.error('❌ MongoDB connection error:', err));
 } else {
   console.log('ℹ️  Test environment detected - skipping automatic MongoDB connect');
