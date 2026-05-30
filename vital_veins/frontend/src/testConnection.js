@@ -3,13 +3,17 @@ const testConnection = async () => {
   try {
     console.log('🧪 Testing backend connection from frontend...');
     
+    const apiBase = process.env.REACT_APP_API_URL
+      ? process.env.REACT_APP_API_URL.replace(/\/+$/, '')
+      : window.location.origin;
+
     // Test health endpoint
-    const healthResponse = await fetch('http://localhost:5000/api/health');
+    const healthResponse = await fetch(`${apiBase}/api/health`);
     const healthData = await healthResponse.json();
     console.log('✅ Health check:', healthData);
     
     // Test login endpoint
-    const loginResponse = await fetch('http://localhost:5000/api/auth/login', {
+    const loginResponse = await fetch(`${apiBase}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

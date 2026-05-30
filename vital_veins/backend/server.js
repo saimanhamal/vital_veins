@@ -8,23 +8,26 @@ const { Server } = require('socket.io');
 require('dotenv').config();
 
 const DATABASE_URL = process.env.MONGODB_URI || 'mongodb://localhost:27017/vitalveins';
+const CLIENT_URL = process.env.CLIENT_URL || 'https://vital-veins.onrender.com';
+const allowedOrigins = [
+  CLIENT_URL,
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
+  'http://localhost:3002',
+  'http://127.0.0.1:3002',
+  'http://localhost:3003',
+  'http://127.0.0.1:3003',
+  'http://localhost:3004',
+  'http://127.0.0.1:3004'
+];
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:3000",
-      "http://127.0.0.1:3000",
-      "http://localhost:3001",
-      "http://127.0.0.1:3001",
-      "http://localhost:3002",
-      "http://127.0.0.1:3002",
-      "http://localhost:3003",
-      "http://127.0.0.1:3003",
-      "http://localhost:3004",
-      "http://127.0.0.1:3004"
-    ],
+    origin: allowedOrigins,
     methods: ["GET", "POST"]
   }
 });
@@ -42,18 +45,7 @@ app.use((req, res, next) => {
 });
 
 app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:3001",
-    "http://127.0.0.1:3001",
-    "http://localhost:3002",
-    "http://127.0.0.1:3002",
-    "http://localhost:3003",
-    "http://127.0.0.1:3003",
-    "http://localhost:3004",
-    "http://127.0.0.1:3004"
-  ],
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
